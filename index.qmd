@@ -35,17 +35,16 @@ Last Updated: `r format(Sys.time(), "%A %m %d, %Y at %H:%M%p")`
 #| echo: false
 #| message: false
 #| warning: false
-
+#| fig-align: left
 if(!require("leaflet")){
     options(repos=c(CRAN="https://cloud.r-project.org"))
     install.packages("leaflet")
     stopifnot(require("leaflet"))
 }
-
 baruch_longitude <- -73.98333
 baruch_latitude  <- +40.74028
 
-leaflet() |>
+leaflet(width = "400", height = "300") |>
   addTiles() |>
   setView(baruch_longitude, baruch_latitude, zoom=17) |>
   addPopups(baruch_longitude, baruch_latitude, 
