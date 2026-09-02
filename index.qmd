@@ -2,6 +2,8 @@
 title: "Nasta Durand's Website"
 ---
 
+![My headshot](headshot.png)
+
 Hello world, welcome to my page! I'm Nastassjia Durand. I'm a graduate student at Baruch College. Business Analytics major, with a concentration in Data Analytics. I've been working for 5+ years in project management, consulting and strategy, across financial services (PwC, BNP Paribas, Allianz), digital innovation and sustainability.
 
 To complete this experience and start transitioning to data analytics, I did an internship this summer at the MTA, within the LIRR Strategic Priorities team (Office of the President). The role blended strategy with data insights, to make strategic recommendations based on tangible internal data. I extracted, processed (cleaned), analyzed and translated data into actionable insights for leadership. This experience represented my first concrete experience in my project to transition into data analytics.
