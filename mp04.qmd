@@ -1,0 +1,7 @@
+
+  ---
+  title: "Mini-Project Placeholder"
+  ---
+  
+  This is a placeholder for STA9750 Mini-Project 4. Check back soon for more!
+  
