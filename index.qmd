@@ -1,0 +1,56 @@
+---
+title: "Nasta Durand's Website"
+---
+
+My name is Nastassjia Durand. I'm a current graduate student at Baruch College, studying Business Analytics, with a concentration in Data Analytics. 
+
+My background spans project management and consulting (PwC France), with experience across financial services (BNP Paribas New York, Allianz France), digital innovation and sustainability. 
+
+I've recently interned this summer 2026 in New York with the Strategic Priorities team at the MTA Long Island Rail Road, at the Office of the President. I collaborated closely with the team to contribute to the LIRR’s strategic initiatives by translating data into clear insights for leadership review. I’ve gained hands-on experience in public sector strategy and transportation operations. 
+
+My goal is to become a hybrid professional, who speaks both technical and non-technical. Leveraging my background in consulting, and adding the technical layer to drive transformation.
+
+Projects include: 
+
+- End-to-end dataset analysis (Baruch coursework) - Python, pandas, SQLite
+
+- Full-cycle DBMS built from business requirements to deployment (Baruch coursework) - MySQL, Flask
+
+- GenAI HR screening tool for candidate shortlisting (Baruch coursework) - LLM
+
+- Rider verbatim analysis at LIRR/MTA - cleaned and analyzed ~17,000 rider verbatim using Python (pandas), scikit-learn, and NLP; built branch-level insight dashboards (qualitative and quantitative), delivered recommendations to leadership
+
+- Peer railroad benchmarking research at LIRR/MTA - benchmarked domestic and international railroads across 4 dimensions to shortlist improvement initiatives
+
+- Infrastructure fund/transaction benchmarking at BNP Paribas - analyzed 20+ infrastructure funds and 500+ transactions to inform market positioning
+
+[View my resume](https://drive.google.com/file/d/1dnv0r7P2SC_PIpQ0gcT9UW98lH2Nr4CN/view?usp=sharing)
+
+```{r}
+#| include: false
+1+1
+```
+--------------
+Last Updated: `r format(Sys.time(), "%A %m %d, %Y at %H:%M%p")`
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+if(!require("leaflet")){
+    options(repos=c(CRAN="https://cloud.r-project.org"))
+    install.packages("leaflet")
+    stopifnot(require("leaflet"))
+}
+
+baruch_longitude <- -73.98333
+baruch_latitude  <- +40.74028
+
+leaflet() |>
+  addTiles() |>
+  setView(baruch_longitude, baruch_latitude, zoom=17) |>
+  addPopups(baruch_longitude, baruch_latitude, 
+            "I am a Master's student at <b>Baruch College</b>!")
+```
+
