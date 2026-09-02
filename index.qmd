@@ -2,7 +2,7 @@
 title: "Nasta Durand's Website"
 ---
 
-![My headshot](headshot.png)
+![My headshot](headshot.jpg){width=100px fig-align="left"}
 
 Hello world, welcome to my page! I'm Nastassjia Durand. I'm a graduate student at Baruch College. Business Analytics major, with a concentration in Data Analytics. I've been working for 5+ years in project management, consulting and strategy, across financial services (PwC, BNP Paribas, Allianz), digital innovation and sustainability.
 
