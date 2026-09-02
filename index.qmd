@@ -51,6 +51,6 @@ leaflet() |>
   addTiles() |>
   setView(baruch_longitude, baruch_latitude, zoom=17) |>
   addPopups(baruch_longitude, baruch_latitude, 
-            "I am a Master's student at <b>Baruch College</b>!")
+            "Here's my school, <b>Baruch College</b>!")
 ```
 
