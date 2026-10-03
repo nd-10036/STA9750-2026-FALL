@@ -172,8 +172,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#step-1-data-ingest-and-cleaning" id="toc-step-1-data-ingest-and-cleaning" class="nav-link active" data-scroll-target="#step-1-data-ingest-and-cleaning">Step 1/ Data Ingest and Cleaning</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -209,6 +215,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="what-is-the-netflix-what-we-watched-report" class="level4">
+<h4 class="anchored" data-anchor-id="what-is-the-netflix-what-we-watched-report">What is the Netflix What We Watched Report?</h4>
+<ul>
+<li>Netflix What We Watched Report - published every 6 months starting in 2023<br>
+</li>
+<li>The “WWW” reports aggregate total global viewership for almost the entire Netflix catalog over six months periods<br>
+</li>
+<li>The data is acquired to analyze viewership to make strategic decisions on the 2027 budget<br>
+</li>
+</ul>
+</section>
+<section id="step-1-data-ingest-and-cleaning" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-data-ingest-and-cleaning">Step 1/ Data Ingest and Cleaning</h3>
+<p><strong>Goal</strong>: ingest and clean the data to make it efficiently usable for analysis.<br>
+</p>
+<p><strong>Steps</strong>: read, load the data into R and transform it.</p>
+<ol type="1">
+<li>Ingest the data using the load_netflix_data &lt;- function()</li>
+<li>Examine the data using the View(NETFLIX_DATA) feature</li>
+<li>Fix column titles by adding a rename() step in the original acquisition code</li>
+</ol>
+<p><em>Note</em>: as per the instructions, the following titles were identified for the rename() cleaning process: Title - capital letter, Runtime - capital letter, Views - capital letter, Hours Viewed - capitals and a space, Release Date - capitals and a space and Available Globally? - capitals, a space, and a ?</p>
+<p>Inspect the code by clicking on the drop-down menu below:</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -298,14 +327,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">Hours Viewed</span><span class="st">`</span>, </span>
 <span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">Release Date</span><span class="st">`</span>,</span>
 <span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">Available Globally?</span><span class="st">`</span>, </span>
-<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>           live_event)</span>
-<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>NETFLIX_DATA <span class="ot">&lt;-</span> <span class="fu">load_netflix_data</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>           live_event) <span class="sc">|&gt;</span></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">title =</span> Title,</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>           <span class="at">runtime =</span> Runtime,</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>           <span class="at">views =</span> Views,</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>           <span class="at">hours_viewed =</span> <span class="st">`</span><span class="at">Hours Viewed</span><span class="st">`</span>,</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>           <span class="at">release_date =</span> <span class="st">`</span><span class="at">Release Date</span><span class="st">`</span>,</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>           <span class="at">available_globally =</span> <span class="st">`</span><span class="at">Available Globally?</span><span class="st">`</span>)</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a>NETFLIX_DATA <span class="ot">&lt;-</span> <span class="fu">load_netflix_data</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
