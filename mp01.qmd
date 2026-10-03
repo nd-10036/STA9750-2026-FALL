@@ -8,22 +8,26 @@ format:
     toc: true
 ---
 
-#### What is the Netflix What We Watched Report?
-- Netflix What We Watched Report - published every 6 months starting in 2023\
-- The "WWW" reports aggregate total global viewership for almost the entire Netflix catalog over six months periods\
-- The data is acquired to analyze viewership to make strategic decisions on the 2027 budget\
+***What is the Netflix What We Watched Report?***
+
+- Netflix What We Watched Report - published every 6 months starting in 2023
+- The "WWW" reports aggregate total global viewership for almost the entire Netflix catalog over six months periods
+- The data is acquired to analyze viewership to make strategic decisions on the 2027 budget
 
 ### Step 1/ Data Ingest and Cleaning
 
-**Goal**: ingest and clean the data to make it efficiently usable for analysis.\
+**Goal**: ingest and clean the data to make it efficiently usable for analysis.
 
 **Steps**: read, load the data into R and transform it.
 
-1. Ingest the data using the load_netflix_data <- function()
-2. Examine the data using the View(NETFLIX_DATA) feature
-3. Fix column titles by adding a rename() step in the original acquisition code
+1. Ingest the data using the `load_netflix_data()` function
+2. Examine the data using the `View(NETFLIX_DATA)` feature
+3. Fix column titles by adding a `rename()` step in the original acquisition code
+4. Fix column types by adding a `mutate()` step in the original acquisition code 
 
-*Note*: as per the instructions, the following titles were identified for the rename() cleaning process: Title - capital letter, Runtime - capital letter, Views - capital letter, Hours Viewed	- capitals and a space, Release Date	- capitals and a space and Available Globally? - capitals, a space, and a ?
+*Note 1*: the following column titles were identified for the `rename()` cleaning process: `Title` - capital letter, `Runtime` - capital letter, `Views` - capital letter, `Hours Viewed`	- capitals and a space, `Release Date`	- capitals and a space and `Available Globally?` - capitals, a space, and a ?
+
+*Note 2*: the following column titles were identified for the `mutate()` cleaning process: `year` - from `chr` to `int` and `available_globally` - from `chr` to `lgl`
 
 Inspect the code by clicking on the drop-down menu below:
 ```{r}
@@ -122,7 +126,9 @@ load_netflix_data <- function(){
            views = Views,
            hours_viewed = `Hours Viewed`,
            release_date = `Release Date`,
-           available_globally = `Available Globally?`)
+           available_globally = `Available Globally?`) |>
+    mutate(year = as.integer(year),
+           available_globally = available_globally == "Yes")
 }
 
 NETFLIX_DATA <- load_netflix_data()
