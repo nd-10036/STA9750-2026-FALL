@@ -7,7 +7,7 @@ image: headshot.jpg
 
 ## Welcome
 
-![](headshot.jpg){width=100px fig-align="left"}
+![](Images/headshot.jpg){width=100px fig-align="left"}
 
 Hi there! I'm Nastassjia (Nasta) Durand, a current graduate student at Baruch College - Business Analytics major, with a concentration in Data Analytics (graduating May 2027). 
 

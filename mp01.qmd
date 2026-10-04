@@ -7,6 +7,15 @@ format:
     code-fold: true
     toc: true
 ---
+![](images/Netflix_logo.png){width=20% fig-align="left"}
+![](images/WWW_snapshot.png){width=40% fig-align="left"}
+
+**Sources**
+
+::: {.small}
+- Netflix logo © Netflix, Inc. Image retrieved from [You Wiki (Fandom)](https://you.fandom.com/wiki/Netflix).
+- Netflix (2026). *What We Watched the First Half of 2026*. Netflix Newsroom. Image retrieved from [about.netflix.com](https://about.netflix.com/en/news/what-we-watched-the-first-half-of-2026).
+:::
 
 ```{r}
 #| label: setup

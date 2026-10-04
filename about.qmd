@@ -1,6 +1,6 @@
 ---
 title: "Nastassjia Durand"
-image: headshot.jpg
+image: Images/headshot.jpg
 about:
   template: solana
   image-shape: round
