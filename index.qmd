@@ -1,6 +1,6 @@
 --- 
 title: "Nastassjia Durand"
-image: headshot.jpg
+image: images/headshot.jpg
 ---
 
 <div style="text-align: justify">
