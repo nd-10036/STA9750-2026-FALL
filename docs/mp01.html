@@ -381,8 +381,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
 <p><strong>Interpretation</strong></p>
 <p>In this output, key information is given - number of rows (to know how extensive the data is) - number of columns (to see how many attributes there are per row) - a line per row, giving the “name”, the data type and the first few values for each</p>
 <p>This is very useful, to envision on a high-level how the data frame is structured. Also, it is particularly useful to see each data type - as learned, R will interpret the data as structured in the data set. E.g. if year is a chr (a “string”), R will consider it as such, even though a human knows that year is composed of integers.</p>
-<p>This “view” definitely allows for an assessment on a high-level, although probably not sufficient to conduct a full analysis. It is used to build the vision, the foundations to after dig deeper into what to do with each values. Indeed, here the details that would serve for a proper “cleaning” are not enough. There are no descriptive statistics and information about NA values for example.</p>
-<p>This is why this overview is best for an introduction to the data set, as a very first step but is limited for the next parts of an analysis (defining the strategy for missing values, getting an idea of key measures etc.). It is also pretty useful for visual people, to imagine how the data set renders (without using the <code>gt()</code>package).</p>
+<p>This “view” is used to introduce the data set, build the vision, and the foundations to after dig deeper into what to do with each values. Indeed, here the details that would serve for a proper “cleaning” are not enough. There are no descriptive statistics and information about NA values for example.</p>
 <p><em>2/ Using <code>skim()</code></em></p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(NETFLIX_DATA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -659,7 +658,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
 </div>
 <p><strong>Interpretation</strong></p>
 <p>Contrary to the <code>glimpse()</code>function, this output gives more granularity on the data. The same “basic information” appears (name, number of rows, number of columns) but what is interesting here is that this view focuses on variable types (character, date, logical and numeric).</p>
-<p>For each type, the name is given with additional information such as the number of NA and a full descriptive analysis (rate, mean, standard deviation, quartiles and a histogram). This is more useful when getting to understand the data set on a more statistical way, that can lead to an evaluation of what the output could be. However, since it tends more towards the statistical side, there are no overviews of the actual data (2023, 2023H1, period dates, title, runtime, views etc).</p>
+<p>For each type, the name is given with additional information such as the number of NA and a full descriptive analysis (rate, mean, standard deviation, quartiles and a histogram). This is more useful when trying to understand the data set in a more statistical way, that can lead to an evaluation of what the output could be. However, since it tends more towards the statistical side, there are no overviews of the actual data (2023, 2023H1, period dates, title, runtime, views etc).</p>
 <p>As an ending note, the two functions serve two different purposes and are complementary. Each function can be used for a different purpose, and can serve better depending on the context and the data type. For example, if a data set is largely comprised of qualitative data, perhaps the <code>glimpse()</code>function would be more appropriate. And vice-versa.</p>
 <p><em>Additional optional step - <code>gt()</code></em><br>
 </p>
@@ -681,23 +680,23 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">decimals =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="dcueebgmpc" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#dcueebgmpc table {
+<div id="irsmrwvnqm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#irsmrwvnqm table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#dcueebgmpc thead, #dcueebgmpc tbody, #dcueebgmpc tfoot, #dcueebgmpc tr, #dcueebgmpc td, #dcueebgmpc th {
+#irsmrwvnqm thead, #irsmrwvnqm tbody, #irsmrwvnqm tfoot, #irsmrwvnqm tr, #irsmrwvnqm td, #irsmrwvnqm th {
   border-style: none;
 }
 
-#dcueebgmpc p {
+#irsmrwvnqm p {
   margin: 0;
   padding: 0;
 }
 
-#dcueebgmpc .gt_table {
+#irsmrwvnqm .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -723,12 +722,12 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-left-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_caption {
+#irsmrwvnqm .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#dcueebgmpc .gt_title {
+#irsmrwvnqm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -740,7 +739,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-bottom-width: 0;
 }
 
-#dcueebgmpc .gt_subtitle {
+#irsmrwvnqm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -752,7 +751,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-top-width: 0;
 }
 
-#dcueebgmpc .gt_heading {
+#irsmrwvnqm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -764,13 +763,13 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-right-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_bottom_border {
+#irsmrwvnqm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_col_headings {
+#irsmrwvnqm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -785,7 +784,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-right-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_col_heading {
+#irsmrwvnqm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -805,7 +804,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   overflow-x: hidden;
 }
 
-#dcueebgmpc .gt_column_spanner_outer {
+#irsmrwvnqm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -817,15 +816,15 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   padding-right: 4px;
 }
 
-#dcueebgmpc .gt_column_spanner_outer:first-child {
+#irsmrwvnqm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#dcueebgmpc .gt_column_spanner_outer:last-child {
+#irsmrwvnqm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#dcueebgmpc .gt_column_spanner {
+#irsmrwvnqm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -837,11 +836,11 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   width: 100%;
 }
 
-#dcueebgmpc .gt_spanner_row {
+#irsmrwvnqm .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#dcueebgmpc .gt_group_heading {
+#irsmrwvnqm .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -867,7 +866,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   text-align: left;
 }
 
-#dcueebgmpc .gt_empty_group_heading {
+#irsmrwvnqm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -882,15 +881,15 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   vertical-align: middle;
 }
 
-#dcueebgmpc .gt_from_md > :first-child {
+#irsmrwvnqm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#dcueebgmpc .gt_from_md > :last-child {
+#irsmrwvnqm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#dcueebgmpc .gt_row {
+#irsmrwvnqm .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -909,7 +908,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   overflow-x: hidden;
 }
 
-#dcueebgmpc .gt_stub {
+#irsmrwvnqm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -922,7 +921,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   padding-right: 5px;
 }
 
-#dcueebgmpc .gt_stub_row_group {
+#irsmrwvnqm .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -936,15 +935,15 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   vertical-align: top;
 }
 
-#dcueebgmpc .gt_row_group_first td {
+#irsmrwvnqm .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#dcueebgmpc .gt_row_group_first th {
+#irsmrwvnqm .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#dcueebgmpc .gt_summary_row {
+#irsmrwvnqm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -954,16 +953,16 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   padding-right: 5px;
 }
 
-#dcueebgmpc .gt_first_summary_row {
+#irsmrwvnqm .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_first_summary_row.thick {
+#irsmrwvnqm .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#dcueebgmpc .gt_last_summary_row {
+#irsmrwvnqm .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -973,7 +972,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-bottom-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_grand_summary_row {
+#irsmrwvnqm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -983,7 +982,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   padding-right: 5px;
 }
 
-#dcueebgmpc .gt_first_grand_summary_row {
+#irsmrwvnqm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -993,7 +992,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-top-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_last_grand_summary_row_top {
+#irsmrwvnqm .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1003,11 +1002,11 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-bottom-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_striped {
+#irsmrwvnqm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#dcueebgmpc .gt_table_body {
+#irsmrwvnqm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1016,7 +1015,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-bottom-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_footnotes {
+#irsmrwvnqm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1030,7 +1029,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-right-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_footnote {
+#irsmrwvnqm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1039,7 +1038,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   padding-right: 5px;
 }
 
-#dcueebgmpc .gt_sourcenotes {
+#irsmrwvnqm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1053,7 +1052,7 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   border-right-color: #D3D3D3;
 }
 
-#dcueebgmpc .gt_sourcenote {
+#irsmrwvnqm .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1061,72 +1060,72 @@ $ live_event         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
   padding-right: 5px;
 }
 
-#dcueebgmpc .gt_left {
+#irsmrwvnqm .gt_left {
   text-align: left;
 }
 
-#dcueebgmpc .gt_center {
+#irsmrwvnqm .gt_center {
   text-align: center;
 }
 
-#dcueebgmpc .gt_right {
+#irsmrwvnqm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#dcueebgmpc .gt_font_normal {
+#irsmrwvnqm .gt_font_normal {
   font-weight: normal;
 }
 
-#dcueebgmpc .gt_font_bold {
+#irsmrwvnqm .gt_font_bold {
   font-weight: bold;
 }
 
-#dcueebgmpc .gt_font_italic {
+#irsmrwvnqm .gt_font_italic {
   font-style: italic;
 }
 
-#dcueebgmpc .gt_super {
+#irsmrwvnqm .gt_super {
   font-size: 65%;
 }
 
-#dcueebgmpc .gt_footnote_marks {
+#irsmrwvnqm .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#dcueebgmpc .gt_asterisk {
+#irsmrwvnqm .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#dcueebgmpc .gt_indent_1 {
+#irsmrwvnqm .gt_indent_1 {
   text-indent: 5px;
 }
 
-#dcueebgmpc .gt_indent_2 {
+#irsmrwvnqm .gt_indent_2 {
   text-indent: 10px;
 }
 
-#dcueebgmpc .gt_indent_3 {
+#irsmrwvnqm .gt_indent_3 {
   text-indent: 15px;
 }
 
-#dcueebgmpc .gt_indent_4 {
+#irsmrwvnqm .gt_indent_4 {
   text-indent: 20px;
 }
 
-#dcueebgmpc .gt_indent_5 {
+#irsmrwvnqm .gt_indent_5 {
   text-indent: 25px;
 }
 
-#dcueebgmpc .katex-display {
+#irsmrwvnqm .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#dcueebgmpc div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#irsmrwvnqm div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
