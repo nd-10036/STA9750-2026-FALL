@@ -30,6 +30,11 @@ format:
   html:
     theme: lux
     toc: false
+    include-in-header:
+      text: |
+        <style>
+          strong, b { font-weight: 900; }
+        </style>
 
 editor:
   mode: source
