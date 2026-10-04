@@ -7,8 +7,8 @@ format:
     code-fold: true
     toc: true
 ---
-![](images/Netflix_logo.png){width=20% fig-align="left"}
-![](images/WWW_snapshot.png){width=40% fig-align="left"}
+![](Images/Netflix_logo.png){width=20% fig-align="left"}
+![](Images/WWW_snapshot.png){width=40% fig-align="left"}
 
 **Sources**
 
