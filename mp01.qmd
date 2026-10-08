@@ -34,20 +34,13 @@ library(gt)
 
 ### Step 1/ Data Ingest and Cleaning
 
-**Goal**: ingest and clean the data to make it efficiently usable for analysis.
+**Goal**: load the data and transform it to make it efficiently usable for analysis.
 
-**Steps**: read, load the data into R and transform it.
+After importing the data:
 
-1. Ingest the data using the `load_netflix_data()` function
-2. Examine the data using the `View(NETFLIX_DATA)` feature
-3. Fix column titles by adding a `rename()` step in the original acquisition code
-4. Fix column types by adding a `mutate()` step in the original acquisition code 
+1. we rename columns in the data set to get valid `R` variable names, aligned on the same format (e.g. all lower case, multi-word separated by underscores)
+2. we change variable types when appropriate, to ensure that `R` will interpret them as the correct type for future arithmetic manipulation (e.g. `year` from `chr` to `int`)
 
-*Note 1*: the following column titles were identified for the `rename()` cleaning process: `Title` - capital letter, `Runtime` - capital letter, `Views` - capital letter, `Hours Viewed`	- capitals and a space, `Release Date`	- capitals and a space and `Available Globally?` - capitals, a space, and a ?
-
-*Note 2*: the following column titles were identified for the `mutate()` cleaning process: `year` - from `chr` to `int` and `available_globally` - from `chr` to `lgl`
-
-Inspect the code by clicking on the drop-down menu below:
 ```{r}
 #| label: load-data
 #| message: false
@@ -153,14 +146,8 @@ NETFLIX_DATA <- load_netflix_data()
 ```
 
 ### Step 2/ Initial Data Exploration
-Here, two functions will be used to get an idea of the data.
 
-1. `glimpse()` - getting the basic dimensions of a data frame, printing a line summary of each column giving its name, type, and the first few values in the table
-2. `skim()` - an overview about data structure and types, identifies grouping structure (if any is present), and gives summaries appropriate to the type of each column
-
-*Note:* Also included, a render of `gt()`to experiment with the tool and to see how the data can be under an HTML table view. 
-
-*1/ Using `glimpse()`*
+After an initial survey of our data, 
 
 ```{r}
 #| label: eda-glimpse
@@ -168,36 +155,27 @@ Here, two functions will be used to get an idea of the data.
 glimpse(NETFLIX_DATA)
 ```
 
-**Interpretation**
+we note that the data is a mix of numeric, categorical, date, and logical variables. It's composed of `r scales::comma(nrow(NETFLIX_DATA))` rows and `r ncol(NETFLIX_DATA)` columns.
 
-In this output, key information is given
-- number of rows (to know how extensive the data is)
-- number of columns (to see how many attributes there are per row)
-- a line per row, giving the "name", the data type and the first few values for each
+We also note that some columns like `views` appear to contain a high number of `NA` values, potentially limiting the analyses that rely on this column.
 
-This is very useful, to envision on a high-level how the data frame is structured. Also, it is particularly useful to see each data type - as learned, R will interpret the data as structured in the data set. E.g. if year is a chr (a "string"), R will consider it as such, even though a human knows that year is composed of integers. 
+Finally, we can get an idea of what one row represents: one title in one period. It's worth noting that titles can repeat across periods.
 
-This "view" is used to introduce the data set, build the vision, and the foundations to after dig deeper into what to do with each values. Indeed, here the details that would serve for a proper "cleaning" are not enough. There are no descriptive statistics and information about NA values for example. 
+We take another look at the data, focusing now more on the statistical information,
 
-
-*2/ Using `skim()`*
 ```{r}
 #| label: eda-skim
 #| code-fold: false
 skim(NETFLIX_DATA)
 ```
 
-**Interpretation**
+we see that the dataset seems to be rather complete, with very few missing values across all variable types, except for numeric `runtime`, `views` and date `release_date` where the `complete_rate` is below 80% for all three. 
 
-Contrary to the `glimpse()`function, this output gives more granularity on the data. The same "basic information" appears (name, number of rows, number of columns) but what is interesting here is that this view focuses on variable types (character, date, logical and numeric). 
+The mean for `hours_viewed` is `r scales::comma(mean(NETFLIX_DATA$hours_viewed))` and the median is `r scales::comma(median(NETFLIX_DATA$hours_viewed))`, where the mean is about `r round(mean(NETFLIX_DATA$hours_viewed) / median(NETFLIX_DATA$hours_viewed), 1)`x the median. We note a heavily skewed distribution, indicating that some titles may be very popular compared to others.
 
-For each type, the name is given with additional information such as the number of NA and a full descriptive analysis (rate, mean, standard deviation, quartiles and a histogram). This is more useful when trying to understand the data set in a more statistical way, that can lead to an evaluation of what the output could be. However, since it tends more towards the statistical side, there are no overviews of the actual data (2023, 2023H1, period dates, title, runtime, views etc). 
 
-As an ending note, the two functions serve two different purposes and are complementary. Each function can be used for a different purpose, and can serve better depending on the context and the data type. For example, if a data set is largely comprised of qualitative data, perhaps the `glimpse()`function would be more appropriate. And vice-versa.
+*Note:* we also included a table to see which titles in what period could explain the skewed distribution. 
 
-*Additional optional step - `gt()`*\
-
-The `slice_max()`method was chosen to ensure consistent output, with the 5 biggest title
 ```{r}
 #| label: eda-gt-top5
 NETFLIX_DATA |>
@@ -214,6 +192,7 @@ NETFLIX_DATA |>
              decimals = 0)
 ```
 
+The most popular titles are specific seasons of different shows, indicating that the popularity is broken down by season, and not show overall.
 
 ### Step 3/ Exploratory Questions
 
