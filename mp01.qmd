@@ -32,7 +32,7 @@ library(gt)
 - The "WWW" reports aggregate total global viewership for almost the entire Netflix catalog over six months periods
 - The data is acquired to analyze viewership to make strategic decisions on the 2027 budget
 
-### Step 1/ Data Ingest and Cleaning
+### 1/ Data Ingest and Cleaning
 
 **Goal**: load the data and transform it to make it efficiently usable for analysis.
 
@@ -40,6 +40,7 @@ After importing the data:
 
 1. we rename columns in the data set to get valid `R` variable names, aligned on the same format (e.g. all lower case, multi-word separated by underscores)
 2. we change variable types when appropriate, to ensure that `R` will interpret them as the correct type for future arithmetic manipulation (e.g. `year` from `chr` to `int`)
+3. we filter out the "Other Shows" entries from the 2025H2 and 2026H1 reports. Netflix changed the report by aggregating many shows together under one bucket, thus not representing a single one. This would cause a distortion in title rankings and comparisons across years/periods.
 
 ```{r}
 #| label: load-data
@@ -139,13 +140,14 @@ load_netflix_data <- function(){
            release_date = `Release Date`,
            available_globally = `Available Globally?`) |>
     mutate(year = as.integer(year),
-           available_globally = available_globally == "Yes")
+           available_globally = available_globally == "Yes") |>
+    filter_out(title == "Other Shows")
 }
 
 NETFLIX_DATA <- load_netflix_data()
 ```
 
-### Step 2/ Initial Data Exploration
+### 2/ Initial Data Exploration
 
 After an initial survey of our data, 
 
@@ -161,7 +163,7 @@ We also note that some columns like `views` appear to contain a high number of `
 
 Finally, we can get an idea of what one row represents: one title in one period. It's worth noting that titles can repeat across periods.
 
-We take another look at the data, focusing now more on the statistical information,
+We now take another look at the data, focusing now more on the statistical information,
 
 ```{r}
 #| label: eda-skim
@@ -184,31 +186,246 @@ NETFLIX_DATA |>
   gt() |>
   tab_header(title = "The 5 Netflix titles with the most Hours Viewed",
              subtitle = "From the WWW - What We Watched reports") |>
-  cols_label(title = md("Title"),
-             period = md("Period"),
-             hours_viewed = md("Hours Viewed"),
-             views = md("Views")) |>
+  cols_label(title = ("Title"),
+             period = ("Period"),
+             hours_viewed = ("Hours Viewed"),
+             views = ("Views")) |>
   fmt_number(columns = c(hours_viewed, views),
              decimals = 0)
 ```
 
 The most popular titles are specific seasons of different shows, indicating that the popularity is broken down by season, and not show overall.
 
-### Step 3/ Exploratory Questions
+### 3/ Exploratory Questions
+
+Now that we have looked at the dataset structure and gotten an idea of its content, we deep dive into some key representative facts about the WWW report. This allows us to understand the specific content, and not only the statistical components.
+
+First, we want to see the date range covered in the dataset.
+
+```{r}
+#| label: t5-q1-date-range
+date_start <- min(NETFLIX_DATA$period_start)
+date_end <- max(NETFLIX_DATA$period_end)
+```
+
+The covered dates are from **`r format(date_start, "%B %d, %Y")`** to **`r format(date_end, "%B %d, %Y")`**.
+
+What is interesting here, besides the total number of entries in the dataset, is to see how many distinct titles exist.
+
+```{r}
+#| label: t5-q2-number-titles
+n_titles <- n_distinct(NETFLIX_DATA$title)
+```
+
+The total number of shows and movies in the dataset is **`r scales::comma(n_titles)`**. This is very different from the number of entries, **`r scales::comma(nrow(NETFLIX_DATA))`**, confirming that titles may appear several times across periods. 
+
+There are several very popular shows on Netflix. We take a look at the Bridgerton Universe and Stranger Things.
+
+```{r}
+#| label: t5-q3-bridgerton
+bridgerton_hours <- NETFLIX_DATA |>
+  filter(str_detect(title, "Bridgerton")) |>
+  summarize(total = sum(hours_viewed)) |>
+  pull(total)
+```
+
+While the Bridgerton Universe is broadly viewed with **`r scales::comma(bridgerton_hours)`** total hours,
+
+```{r}
+#| label: t5-q4-stranger-things
+stranger_things_hours <- NETFLIX_DATA |>
+  filter(str_detect(title, "Stranger Things")) |>
+  filter_out(str_detect(title, "Beyond")) |>
+  filter_out(str_detect(title, "Tales")) |>
+  filter_out(str_detect(title, "Fireplace")) |>
+  summarize(total = sum(hours_viewed)) |>
+  pull(total)
+```
+
+the five seasons of the Stranger Things show accumulate **`r scales::comma(stranger_things_hours)`** total hours, surpassing the Bridgerton Universe by **`r scales::percent(stranger_things_hours / bridgerton_hours - 1, accuracy = 1)`** (a close race).
+
+Another exploration is to see what percentage of the total watch time in the first 6 months of 2026 (2026H1) was spent on the top 10 titles.
+
+```{r}
+#| label: t5-q5-top10
+top10_share <- NETFLIX_DATA |>
+  filter(period == "2026H1") |>
+  arrange(desc(hours_viewed)) |>
+  summarize(share = sum(hours_viewed[1:10]) / sum(hours_viewed)) |>
+  pull(share)
+```
+
+For 2026H1, **`r scales::percent(top10_share, accuracy = 0.1)`** of watch time was spent on the top 10 titles, out of all **`r scales::comma(sum(NETFLIX_DATA$period == "2026H1"))`** available titles.
+
+To get a sense of Netflix's global reach, we look at what fraction of the catalog is available globally by both title and hours viewed.
+
+```{r}
+#| label: t5-q6-globally-available
+available_globally_by_title <- NETFLIX_DATA |>
+  summarize(global = any(available_globally), .by = title) |>
+  summarize(share = mean(global)) |>
+  pull(share)
+
+available_globally_by_hours <- NETFLIX_DATA |>
+  summarize(share = sum(hours_viewed[available_globally], na.rm = TRUE) /
+                    sum(hours_viewed[!is.na(available_globally)])) |>
+  pull(share)
+```
+
+The share of the Netflix catalog available globally is **`r scales::percent(available_globally_by_title, accuracy = 0.1)`** by title, and **`r scales::percent(available_globally_by_hours, accuracy = 0.1)`** weighted by hours viewed.
+
+### 4/ Exploratory Tables
+
+1. What was the top title (by total hours viewed) in each period and what fraction of total viewership did it capture?
+
+[Before: why look at the #1 title per period, e.g., how dominant is a single hit?]
+
+```{r}
+#| label: t6-q1-top-title
+NETFLIX_DATA |>
+  mutate(share = hours_viewed / sum(hours_viewed), .by = period) |>
+  slice_max(hours_viewed, n = 1, by = period, with_ties = FALSE) |>
+  select(period, title, hours_viewed, share) |>
+  gt() |>
+  tab_header(title = "TITLE TO DO",
+             subtitle = "[TAKEAWAY TO DO]") |>
+  cols_label(period = "Period",
+             title = "Title",
+             hours_viewed = "Hours Viewed",
+             share = "Share of Period Viewing") |>
+  fmt_number(columns = hours_viewed, suffixing = TRUE, decimals = 1) |>
+  fmt_percent(columns = share, decimals = 1) |>
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1")
+```
+
+[After: What it tells, e.g., is the top share stable, rising, falling? Shows or movies?]
+
+
+2. How has Netflix’s catalog changed in size over the periods for which we have questions?
+
+[Before: why catalog size matters (number of titles and total runtime)]
+
+```{r}
+#| label: t6-q2-catalog-size
+NETFLIX_DATA |>
+  summarize(n_titles = n_distinct(title),
+            total_runtime_minutes = sum(runtime, na.rm = TRUE),
+            total_runtime_hours = total_runtime_minutes / 60,
+            .by = period) |>
+  gt() |>
+  tab_header(title = "TITLE TO DO",
+             subtitle = "[TAKEAWAY TO DO]") |>
+  cols_label(period = "Period",
+             n_titles = "Number of Titles",
+             total_runtime_minutes = md("Total Runtime (*minutes*)"),
+             total_runtime_hours = md("Equivalent Total Runtime (*hours*)")) |>
+  fmt_number(columns = n_titles, decimals = 0) |>
+  fmt_number(columns = c(total_runtime_minutes, total_runtime_hours), suffixing = TRUE, decimals = 1) |>
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1")
+```
+
+[After: growth or decline? Caveat: only titles above the reporting threshold appear, so this is the *observed* catalog, and some runtimes are missing.]
+
+
+3. Which titles have had the most consistently high viewership across all periods? 
+
+[Before: why "staples" matter, and your definition: present in every period, ranked by their *lowest* period (a high floor = consistently watched)]
+
+```{r}
+#| label: t6-q3-highest-viewership
+n_periods_total <- n_distinct(NETFLIX_DATA$period)
+
+NETFLIX_DATA |>
+  summarize(n_periods = n_distinct(period),
+            avg_hours = mean(hours_viewed),
+            min_hours = min(hours_viewed),
+            sd_hours = sd(hours_viewed),
+            .by = title) |>
+  filter(n_periods == n_periods_total) |>
+  mutate(cv = sd_hours / avg_hours) |>
+  slice_max(min_hours, n = 10) |>
+  select(title, avg_hours, min_hours, cv) |>
+  gt() |>
+  tab_header(title = "TITLE TO DO",
+             subtitle = "TAKEAWAY TO DO") |>
+  cols_label(title = "Title",
+             avg_hours = "Avg. Hours per Period",
+             min_hours = "Lowest Period",
+             cv = md("Variability (*CV*)")) |>
+  fmt_number(columns = c(avg_hours, min_hours), suffixing = TRUE, decimals = 1) |>
+  fmt_percent(columns = cv, decimals = 0) |>
+  tab_source_note("Titles present in all reporting periods, ranked by lowest-period hours. CV = standard deviation / mean.")
+```
+
+[After: what kinds of titles are staples (licensed classics? originals?), and what that suggests strategically]
+
+
+4. Within each period, what fraction of time was spent on ‘shows’ vs movies?
+
+[Before: why it matters, and your heuristic: a title is a show if its name contains "Season" or "Limited Series", or if its runtime exceeds 4 hours]
+
+```{r}
+#| label: t6-q4-shows-movies
+NETFLIX_DATA |>
+  mutate(type = if_else(str_detect(title, "Season|Limited Series") |
+                          coalesce(runtime > 240, FALSE),
+                        "Shows", "Movies")) |>
+  summarize(hours = sum(hours_viewed), .by = c(period, type)) |>
+  mutate(share = hours / sum(hours), .by = period) |>
+  select(period, type, share) |>
+  pivot_wider(names_from = type, values_from = share) |>
+  gt() |>
+  tab_header(title = "Share of Viewing Time: Shows vs. Movies",
+             subtitle = "[Your one-line takeaway]") |>
+  cols_label(period = "Period") |>
+  fmt_percent(columns = c(Shows, Movies), decimals = 1) |>
+  tab_source_note("Show/movie classification based on title keywords and runtime over 4 hours.")
+```
+
+[After: the split and how it moves over time; plus a note on the heuristic's limits (e.g., what a spot check of misclassified titles showed)]
+
+
+5. How does the performance of live events compare to pre-taped content? Does the average live event draw more viewership than an average piece of pre-taped content? How about a ‘top tier’ live event vs ‘top tier’ pre-taped content?
+
+[Before: why it matters, given Netflix's push into live sports and events]
+
+```{r}
+#| label: t6-q5-live-events
+NETFLIX_DATA |>
+  mutate(type = if_else(live_event, "Live Events", "Pre-taped")) |>
+  summarize(n_titles = n(),
+            avg_hours = mean(hours_viewed),
+            median_hours = median(hours_viewed),
+            top10_avg_hours = mean(head(sort(hours_viewed, decreasing = TRUE), 10)),
+            .by = type) |>
+  gt() |>
+  tab_header(title = "Live Events vs. Pre-taped Content",
+             subtitle = "[Your one-line takeaway]") |>
+  cols_label(type = "Content Type",
+             n_titles = "Titles",
+             avg_hours = "Avg. Hours",
+             median_hours = "Median Hours",
+             top10_avg_hours = "Top 10 Avg. Hours") |>
+  fmt_number(columns = n_titles, decimals = 0) |>
+  fmt_number(columns = c(avg_hours, median_hours, top10_avg_hours),
+             suffixing = TRUE, decimals = 1) |>
+  tab_source_note("Top 10 Avg. = mean hours of the 10 most-watched titles in each group.")
+```
+
+[After: answer both of his sub-questions, average vs. average AND top tier vs. top tier, with the caveat that live events are few and short, so hours favor long pre-taped series]
+
+### 5/ Strategy Memo (with visualization)
 
 
 
 
-### Step 4/ Exploratory Tables
 
+::: {.callout-note title="AI Usage Statement" collapse="true"}
 
+Claude was used to help with the code in this project. Help included answering to questions about different ideas for improving the code and the rendering, debugging code, cross-checking etc. All non-code text was generated without the use of any Generative AI tools. Additionally, Claude was used to provide explanations in very simple terms, additional background information on the topic and to brainstorm ideas.
 
-### Step 5/ Strategy Memo (with visualization)
+:::
 
-
-
-
-### AI Usage Statement
 
 
 
