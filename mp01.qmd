@@ -24,6 +24,20 @@ format:
 library(tidyverse)
 library(skimr)
 library(gt)
+
+# Creating a "Netflix theme" for future table formatting
+netflix_red <- "#E50914"
+
+netflix_theme <- function(tbl) {
+  tbl |>
+    tab_options(heading.background.color = netflix_red,
+                column_labels.background.color = "#221F1F",
+                table.border.top.color = netflix_red,
+                table.border.bottom.color = netflix_red) |>
+    tab_style(style = cell_text(color = "white", weight = "bold"),
+              locations = list(cells_title(groups = c("title", "subtitle")),
+                               cells_column_labels()))
+}
 ```
 
 ***What is the Netflix What We Watched Report?***
@@ -173,7 +187,7 @@ skim(NETFLIX_DATA)
 
 we see that the dataset seems to be rather complete, with very few missing values across all variable types, except for numeric `runtime`, `views` and date `release_date` where the `complete_rate` is below 80% for all three. 
 
-The mean for `hours_viewed` is `r scales::comma(mean(NETFLIX_DATA$hours_viewed))` and the median is `r scales::comma(median(NETFLIX_DATA$hours_viewed))`, where the mean is about `r round(mean(NETFLIX_DATA$hours_viewed) / median(NETFLIX_DATA$hours_viewed), 1)`x the median. We note a heavily skewed distribution, indicating that some titles may be very popular compared to others.
+The mean for `hours_viewed` is **`r scales::comma(mean(NETFLIX_DATA$hours_viewed))`** and the median is **`r scales::comma(median(NETFLIX_DATA$hours_viewed))`**, where the mean is about **`r round(mean(NETFLIX_DATA$hours_viewed) / median(NETFLIX_DATA$hours_viewed), 1)`**x the median. We note a heavily skewed distribution, indicating that some titles may be very popular compared to others.
 
 
 *Note:* we also included a table to see which titles in what period could explain the skewed distribution. 
@@ -186,12 +200,13 @@ NETFLIX_DATA |>
   gt() |>
   tab_header(title = "The 5 Netflix titles with the most Hours Viewed",
              subtitle = "From the WWW - What We Watched reports") |>
-  cols_label(title = ("Title"),
-             period = ("Period"),
-             hours_viewed = ("Hours Viewed"),
-             views = ("Views")) |>
+  cols_label(title = "Title",
+             period = "Period",
+             hours_viewed = "Hours Viewed",
+             views = "Views") |>
   fmt_number(columns = c(hours_viewed, views),
-             decimals = 0)
+             decimals = 0) |>
+  netflix_theme()
 ```
 
 The most popular titles are specific seasons of different shows, indicating that the popularity is broken down by season, and not show overall.
@@ -276,55 +291,73 @@ The share of the Netflix catalog available globally is **`r scales::percent(avai
 
 ### 4/ Exploratory Tables
 
-1. What was the top title (by total hours viewed) in each period and what fraction of total viewership did it capture?
+Now we dig deeper into the analysis, by looking at specific change/variation/evolution and more. The granularity is increased for this part, and tables help to visualize the outputs.
 
-[Before: why look at the #1 title per period, e.g., how dominant is a single hit?]
+The goal is to retrieve the top title (by total hours viewed) in each period, and compare it to total viewership. This helps answer the question: how dominant can a single hit be?
 
 ```{r}
 #| label: t6-q1-top-title
-NETFLIX_DATA |>
+top_by_period <- NETFLIX_DATA |>
   mutate(share = hours_viewed / sum(hours_viewed), .by = period) |>
   slice_max(hours_viewed, n = 1, by = period, with_ties = FALSE) |>
-  select(period, title, hours_viewed, share) |>
+  select(period, title, hours_viewed, share)
+
+top_by_period |>
   gt() |>
-  tab_header(title = "TITLE TO DO",
-             subtitle = "[TAKEAWAY TO DO]") |>
+  tab_header(title = "Top Title per Period",
+             subtitle = "TV shows dominate movies in top titles across each period") |>
   cols_label(period = "Period",
              title = "Title",
              hours_viewed = "Hours Viewed",
              share = "Share of Period Viewing") |>
   fmt_number(columns = hours_viewed, suffixing = TRUE, decimals = 1) |>
   fmt_percent(columns = share, decimals = 1) |>
-  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1")
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1-2026H1") |>
+  netflix_theme()
+
+fmt_millions <- scales::label_number(scale = 1e-6, suffix = "M", accuracy = 1)
 ```
 
-[After: What it tells, e.g., is the top share stable, rising, falling? Shows or movies?]
+Across periods, similar trends are observed: hours viewed range from **`r fmt_millions(min(top_by_period$hours_viewed))`** to **`r fmt_millions(max(top_by_period$hours_viewed))`**, and the share is relatively the same, from **`r scales::percent(min(top_by_period$share), accuracy = 0.1)`** to **`r scales::percent(max(top_by_period$share), accuracy = 0.1)`**. This suggests that, although the top title hours viewed can be much higher than other shows, the share is relatively small, meaning that the viewership is either spread out across the catalog, or that the catalog choice is very extensive.
+
+Furthermore, as observed in the table, the top titles are TV shows across all periods. This indicates that the biggest hits on the platform are recurring popular TV shows (with Bridgerton and Squid Game appearing twice, different seasons).
 
 
 2. How has Netflix’s catalog changed in size over the periods for which we have questions?
 
-[Before: why catalog size matters (number of titles and total runtime)]
+Now that the top titles have been reviewed, we assess the evolution of available titles and runtime across the whole catalog *(2023H1-2026H1)*. It matters to see how Netflix evolved across the years (since the WWW reports started) and if it impacted the runtimes. Worth noting is that the evolution does not encompass the whole history of Netflix's catalog. This makes the analysis limited for this particular question.
 
 ```{r}
 #| label: t6-q2-catalog-size
-NETFLIX_DATA |>
+catalog_by_period <- NETFLIX_DATA |>
   summarize(n_titles = n_distinct(title),
             total_runtime_minutes = sum(runtime, na.rm = TRUE),
             total_runtime_hours = total_runtime_minutes / 60,
-            .by = period) |>
+            .by = period)
+
+catalog_by_period |>
   gt() |>
-  tab_header(title = "TITLE TO DO",
-             subtitle = "[TAKEAWAY TO DO]") |>
+  tab_header(title = "Netflix's Catalog Evolution across Periods",
+             subtitle = "A steady growth across the catalog, despite a drop in number of titles between 2023H1 and H2") |>
   cols_label(period = "Period",
              n_titles = "Number of Titles",
              total_runtime_minutes = md("Total Runtime (*minutes*)"),
              total_runtime_hours = md("Equivalent Total Runtime (*hours*)")) |>
   fmt_number(columns = n_titles, decimals = 0) |>
   fmt_number(columns = c(total_runtime_minutes, total_runtime_hours), suffixing = TRUE, decimals = 1) |>
-  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1")
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1") |>
+  tab_footnote(footnote = "Large amount of missing values in the runtime of the 2023H1 period.",
+               locations = cells_body(columns = c(total_runtime_minutes,
+                                                  total_runtime_hours),
+                                      rows = period == "2023H1")) |>
+  netflix_theme()
 ```
 
-[After: growth or decline? Caveat: only titles above the reporting threshold appear, so this is the *observed* catalog, and some runtimes are missing.]
+We run a check on the first period, 2023H1, which shows a high number of titles available, with a low total runtime value (comparatively). It confirms that there is a high number of missing values, thus explaining the low runtime.
+
+Besides this, the number of titles declined drastically (by `r scales::percent(1 - catalog_by_period$n_titles[catalog_by_period$period == "2023H2"] / catalog_by_period$n_titles[catalog_by_period$period == "2023H1"], accuracy = 1)`) during the second period of 2023, H2. However, despite the decline, a steady growth appears in the following periods, without any decline across both number of titles and total runtime.
+
+*Note:* titles with less than 50,000 hours of watch time are omitted. Some titles may therefore be missing.
 
 
 3. Which titles have had the most consistently high viewership across all periods? 
@@ -354,7 +387,8 @@ NETFLIX_DATA |>
              cv = md("Variability (*CV*)")) |>
   fmt_number(columns = c(avg_hours, min_hours), suffixing = TRUE, decimals = 1) |>
   fmt_percent(columns = cv, decimals = 0) |>
-  tab_source_note("Titles present in all reporting periods, ranked by lowest-period hours. CV = standard deviation / mean.")
+  tab_source_note("Titles present in all reporting periods, ranked by lowest-period hours. CV = standard deviation / mean.") |>
+  netflix_theme()
 ```
 
 [After: what kinds of titles are staples (licensed classics? originals?), and what that suggests strategically]
@@ -375,11 +409,12 @@ NETFLIX_DATA |>
   select(period, type, share) |>
   pivot_wider(names_from = type, values_from = share) |>
   gt() |>
-  tab_header(title = "Share of Viewing Time: Shows vs. Movies",
-             subtitle = "[Your one-line takeaway]") |>
+  tab_header(title = "TITLE TO DO",
+             subtitle = "TAKEAWAY TO DO") |>
   cols_label(period = "Period") |>
   fmt_percent(columns = c(Shows, Movies), decimals = 1) |>
-  tab_source_note("Show/movie classification based on title keywords and runtime over 4 hours.")
+  tab_source_note("Show/movie classification based on title keywords and runtime over 4 hours.") |>
+  netflix_theme()
 ```
 
 [After: the split and how it moves over time; plus a note on the heuristic's limits (e.g., what a spot check of misclassified titles showed)]
@@ -399,8 +434,8 @@ NETFLIX_DATA |>
             top10_avg_hours = mean(head(sort(hours_viewed, decreasing = TRUE), 10)),
             .by = type) |>
   gt() |>
-  tab_header(title = "Live Events vs. Pre-taped Content",
-             subtitle = "[Your one-line takeaway]") |>
+  tab_header(title = "TITLE TO DO",
+             subtitle = "TAKEAWAY TO DO") |>
   cols_label(type = "Content Type",
              n_titles = "Titles",
              avg_hours = "Avg. Hours",
@@ -409,7 +444,8 @@ NETFLIX_DATA |>
   fmt_number(columns = n_titles, decimals = 0) |>
   fmt_number(columns = c(avg_hours, median_hours, top10_avg_hours),
              suffixing = TRUE, decimals = 1) |>
-  tab_source_note("Top 10 Avg. = mean hours of the 10 most-watched titles in each group.")
+  tab_source_note("Top 10 Avg. = mean hours of the 10 most-watched titles in each group.") |>
+  netflix_theme()
 ```
 
 [After: answer both of his sub-questions, average vs. average AND top tier vs. top tier, with the caveat that live events are few and short, so hours favor long pre-taped series]
@@ -422,7 +458,7 @@ NETFLIX_DATA |>
 
 ::: {.callout-note title="AI Usage Statement" collapse="true"}
 
-Claude was used to help with the code in this project. Help included answering to questions about different ideas for improving the code and the rendering, debugging code, cross-checking etc. All non-code text was generated without the use of any Generative AI tools. Additionally, Claude was used to provide explanations in very simple terms, additional background information on the topic and to brainstorm ideas.
+Claude was used to help with the code in this project. Help included answering to questions about different ideas for improving the code and the rendering, debugging code, cross-checking, ideas on improving tables etc. All non-code text was generated without the use of any Generative AI tools. Additionally, Claude was used to provide explanations in very simple terms, additional background information on the topic and to brainstorm ideas.
 
 :::
 
