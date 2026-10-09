@@ -503,8 +503,11 @@ Both types create value in a different way. Pre-taped content will shine on the 
 2. Global originals + licensed base (global vs. licensed): 24.6% of titles → 52.1% of viewing; staples are mostly licensed
 
 ```{r}
-#| label: memo-chart
+#| label: memo-chart-1
 #| echo: false
+#| out-width: "75%"
+#| fig-align: "center"
+#| fig-height: 4
 global_chart <- tibble(
   measure = factor(rep(c("Share of titles", "Share of hours viewed"), each = 2),
                    levels = c("Share of titles", "Share of hours viewed")),
@@ -530,8 +533,10 @@ ggplot(global_chart, aes(x = measure, y = share, fill = availability)) +
 3. Live events as a complement (big hits vs. long tail): typical live ≈ typical pre-taped; no blockbusters; value through simultaneous audiences
 
 ```{r}
-#| label: memo-live-chart
+#| label: memo-chart-2
 #| echo: false
+#| out-width: "75%"
+#| fig-align: "center"
 live_chart <- live_vs_taped |>
   select(type, median_hours, avg_hours, top10_avg_hours) |>
   pivot_longer(-type, names_to = "metric", values_to = "hours") |>
