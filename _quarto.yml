@@ -4,6 +4,7 @@ project:
 
 website:
   title: "STA 9750 Submission Material"
+  favicon: "images/favicon.png"
   description:
     Course Projects for STA 9750 at Baruch College
   site-url: "https://nd-10036.github.io/STA9750-2026-FALL/"
