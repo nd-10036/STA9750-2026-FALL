@@ -1,6 +1,7 @@
 ---
 title: "Nastassjia Durand"
 image: images/headshot.jpg
+engine: knitr
 about:
   template: solana
   image-shape: round
@@ -16,6 +17,10 @@ about:
       text: Email
       href: mailto:nasta.durand@gmail.com
 ---
+--------------
+::: {.small}
+Last Updated: `r format(Sys.time(), "%A %B %d, %Y at %I:%M %p")`
+:::
 
 <div style="text-align: justify">
 

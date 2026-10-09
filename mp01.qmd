@@ -2,11 +2,17 @@
 title: "STA 9750 Mini-Project #01: What We Watched: Exploring Netflix Viewing Data"
 author: "Nastassjia Durand"
 date: "2026-09-27"
+engine: knitr
 format:
   html:
     code-fold: true
     toc: true
 ---
+--------------
+::: {.small}
+Last Updated: `r format(Sys.time(), "%A %B %d, %Y at %I:%M %p")`
+:::
+
 ![](images/Netflix_logo.png){width=20% fig-align="left"}
 ![](images/WWW_snapshot.png){width=40% fig-align="left"}
 
