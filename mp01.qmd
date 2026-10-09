@@ -42,7 +42,7 @@ netflix_theme <- function(tbl) {
 
 ***What is the Netflix What We Watched Report?***
 
-- Netflix What We Watched Report - published every 6 months starting in 2023
+- Netflix What We Watched Reports - published every 6 months starting in 2023
 - The "WWW" reports aggregate total global viewership for almost the entire Netflix catalog over six months periods
 - The data is acquired to analyze viewership to make strategic decisions on the 2027 budget
 
@@ -215,38 +215,21 @@ The most popular titles are specific seasons of different shows, indicating that
 
 Now that we have looked at the dataset structure and gotten an idea of its content, we deep dive into some key representative facts about the WWW report. This allows us to understand the specific content, and not only the statistical components.
 
-First, we want to see the date range covered in the dataset.
 
 ```{r}
 #| label: t5-q1-date-range
 date_start <- min(NETFLIX_DATA$period_start)
 date_end <- max(NETFLIX_DATA$period_end)
-```
 
-The covered dates are from **`r format(date_start, "%B %d, %Y")`** to **`r format(date_end, "%B %d, %Y")`**.
-
-What is interesting here, besides the total number of entries in the dataset, is to see how many distinct titles exist.
-
-```{r}
 #| label: t5-q2-number-titles
 n_titles <- n_distinct(NETFLIX_DATA$title)
-```
 
-The total number of shows and movies in the dataset is **`r scales::comma(n_titles)`**. This is very different from the number of entries, **`r scales::comma(nrow(NETFLIX_DATA))`**, confirming that titles may appear several times across periods. 
-
-There are several very popular shows on Netflix. We take a look at the Bridgerton Universe and Stranger Things.
-
-```{r}
 #| label: t5-q3-bridgerton
 bridgerton_hours <- NETFLIX_DATA |>
   filter(str_detect(title, "Bridgerton")) |>
   summarize(total = sum(hours_viewed)) |>
   pull(total)
-```
 
-While the Bridgerton Universe is broadly viewed with **`r scales::comma(bridgerton_hours)`** total hours,
-
-```{r}
 #| label: t5-q4-stranger-things
 stranger_things_hours <- NETFLIX_DATA |>
   filter(str_detect(title, "Stranger Things")) |>
@@ -255,26 +238,14 @@ stranger_things_hours <- NETFLIX_DATA |>
   filter_out(str_detect(title, "Fireplace")) |>
   summarize(total = sum(hours_viewed)) |>
   pull(total)
-```
 
-the five seasons of the Stranger Things show accumulate **`r scales::comma(stranger_things_hours)`** total hours, surpassing the Bridgerton Universe by **`r scales::percent(stranger_things_hours / bridgerton_hours - 1, accuracy = 1)`** (a close race).
-
-Another exploration is to see what percentage of the total watch time in the first 6 months of 2026 (2026H1) was spent on the top 10 titles.
-
-```{r}
 #| label: t5-q5-top10
 top10_share <- NETFLIX_DATA |>
   filter(period == "2026H1") |>
   arrange(desc(hours_viewed)) |>
   summarize(share = sum(hours_viewed[1:10]) / sum(hours_viewed)) |>
   pull(share)
-```
 
-For 2026H1, **`r scales::percent(top10_share, accuracy = 0.1)`** of watch time was spent on the top 10 titles, out of all **`r scales::comma(sum(NETFLIX_DATA$period == "2026H1"))`** available titles.
-
-To get a sense of Netflix's global reach, we look at what fraction of the catalog is available globally by both title and hours viewed.
-
-```{r}
 #| label: t5-q6-globally-available
 available_globally_by_title <- NETFLIX_DATA |>
   summarize(global = any(available_globally), .by = title) |>
@@ -287,7 +258,15 @@ available_globally_by_hours <- NETFLIX_DATA |>
   pull(share)
 ```
 
-The share of the Netflix catalog available globally is **`r scales::percent(available_globally_by_title, accuracy = 0.1)`** by title, and **`r scales::percent(available_globally_by_hours, accuracy = 0.1)`** weighted by hours viewed.
+First, we want to see the date range covered in the dataset: from **`r format(date_start, "%B %d, %Y")`** to **`r format(date_end, "%B %d, %Y")`**.
+
+What is interesting here, besides the total number of entries in the dataset, is to see how many distinct titles exist. The total number of shows and movies in the dataset is **`r scales::comma(n_titles)`**. This is very different from the number of entries, **`r scales::comma(nrow(NETFLIX_DATA))`**, confirming that titles may appear several times across periods. 
+
+There are several very popular shows on Netflix. We take a look at the Bridgerton Universe and Stranger Things. While the Bridgerton Universe is broadly viewed with **`r scales::comma(bridgerton_hours)`** total hours, the five seasons of the Stranger Things show accumulate **`r scales::comma(stranger_things_hours)`** total hours, surpassing the Bridgerton Universe by **`r scales::percent(stranger_things_hours / bridgerton_hours - 1, accuracy = 1)`** (a close race).
+
+Another exploration is to see what percentage of the total watch time in the first 6 months of 2026 (2026H1) was spent on the top 10 titles. For 2026H1, **`r scales::percent(top10_share, accuracy = 0.1)`** of watch time was spent on the top 10 titles, out of all **`r scales::comma(sum(NETFLIX_DATA$period == "2026H1"))`** available titles.
+
+To get a sense of Netflix's global reach, we look at what fraction of the catalog is available globally by both title and hours viewed. The share of the Netflix catalog available globally is **`r scales::percent(available_globally_by_title, accuracy = 0.1)`** by title, and **`r scales::percent(available_globally_by_hours, accuracy = 0.1)`** weighted by hours viewed.
 
 ### 4/ Exploratory Tables
 
