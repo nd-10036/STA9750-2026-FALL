@@ -500,7 +500,14 @@ Both types create value in a different way. Pre-taped content will shine on the 
 ### Strategy Memo
 
 1. Recommendation summary (2-3 sentences)
+
+For the 2027 content strategy, we recommend to focus on XXX and XXX. First, this because of that. Second, this because of that.
+
 2. Global originals + licensed base (global vs. licensed): 24.6% of titles → 52.1% of viewing; staples are mostly licensed
+
+Our research has found that, although regional content is more widespread (with XX% of total hours viewed), globally available titles (with XX% of total hours viewed) absorb XX% of total viewership. This indicates that the global availability (mainly composed of Netflix Originals), are more efficient. bla bla bla
+
+Focusing on developing XXX
 
 ```{r}
 #| label: memo-chart-1
@@ -532,6 +539,10 @@ ggplot(global_chart, aes(x = measure, y = share, fill = availability)) +
 
 3. Live events as a complement (big hits vs. long tail): typical live ≈ typical pre-taped; no blockbusters; value through simultaneous audiences
 
+A typical title performs as well for both category, with XXM vs XXM. However, the average hours viewed is longer for pre-taped (logic since it's longer run time + historically longest in Netflix's history). 
+
+Strategy: increase "one-shot" Live events to bring punctual value and increase revenue around advetising, sponsorships etc.
+
 ```{r}
 #| label: memo-chart-2
 #| echo: false
@@ -562,6 +573,32 @@ ggplot(live_chart, aes(x = metric, y = hours, fill = type)) +
 ```
 
 4. Limitations (hours favor long content; 2023H1 gaps, revenues streams missing)
+
+Basing recommendations solely on hours can bias the results, as viewership varies largely based on typology of content (movies vs. TV shows vs. one shot Live Events). Furthermore, the run time data for 2023H1 is widely missing, causing a potential bias in Period over Period PoP trend analysis. 
+
+```{r}
+#| label: memo-trend-chart
+#| echo: false
+#| out-width: "75%"
+#| fig-align: "center"
+hours_by_period <- NETFLIX_DATA |>
+  summarize(total_hours = sum(hours_viewed), .by = period) |>
+  arrange(period)
+
+ggplot(hours_by_period, aes(x = period, y = total_hours, group = 1)) +
+  geom_line(color = netflix_red, linewidth = 1.2) +
+  geom_point(color = netflix_red, size = 3) +
+  geom_text(aes(label = fmt_hours(total_hours)),
+            vjust = -1, color = "white", size = 3.5) +
+  scale_y_continuous(labels = fmt_hours,
+                     expand = expansion(mult = c(0.05, 0.15))) +
+  labs(title = "[TITLE TO DO]",
+       subtitle = "[KEY TAKEAWAY TO DO]",
+       x = NULL, y = "Total hours viewed",
+       caption = "Excludes the aggregate 'Other Shows' entry. Source: Netflix What We Watched reports, 2023H1-2026H1") +
+  ggplot_theme_netflix()
+```
+Finally, the reports don't correlate with revenue streams, making it hard to propose solid recommendations by analyzing the viewership vs. associated costs.
 
 :::
 
