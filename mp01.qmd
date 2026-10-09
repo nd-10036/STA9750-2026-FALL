@@ -132,7 +132,7 @@ load_netflix_data <- function(){
     mutate(year=str_sub(period, 1, 4), 
            half=str_sub(period, start=6), 
            period_start = make_date(year, if_else(half==1, 1, 7), 1), 
-           period_end = make_date(year, if_else(half==1, 7, 12), if_else(half==1, 30, 31))) |> 
+           period_end = make_date(year, if_else(half==1, 6, 12), if_else(half==1, 30, 31))) |> 
     filter(!is.na(`Hours Viewed`)) |> 
     mutate(live_event = !is.na(Runtime) & str_detect(Runtime, "\\d+:\\d+\\*"), 
            clean_time = str_remove(Runtime, fixed("*")),
@@ -183,7 +183,7 @@ glimpse(NETFLIX_DATA)
 
 we note that the data is a mix of numeric, categorical, date, and logical variables. It's composed of `r scales::comma(nrow(NETFLIX_DATA))` rows and `r ncol(NETFLIX_DATA)` columns.
 
-We also note that some columns like `views` appear to contain a high number of `NA` values, potentially limiting the analyses that rely on this column.
+We also note that some columns like `views` appear to contain `NA` values, potentially limiting the analyses that rely on this column.
 
 Finally, we can get an idea of what one row represents: one title in one period. It's worth noting that titles can repeat across periods.
 
@@ -195,9 +195,9 @@ We now take another look at the data, focusing now more on the statistical infor
 skim(NETFLIX_DATA)
 ```
 
-we see that the dataset seems to be relatively complete, with few missing values across variable types, except for numeric `runtime`, `views` and date `release_date` where the `complete_rate` is near below 80%. 
+we see that the data set seems to be relatively complete, with few missing values across variable types, except for numeric `runtime`, `views` and date `release_date` where the `complete_rate` is near below 80%. 
 
-The mean for `hours_viewed` is **`r scales::comma(mean(NETFLIX_DATA$hours_viewed))`** and the median is **`r scales::comma(median(NETFLIX_DATA$hours_viewed))`**, where the mean is about **`r round(mean(NETFLIX_DATA$hours_viewed) / median(NETFLIX_DATA$hours_viewed), 1)`**x the median. We note a heavily skewed distribution, indicating that some titles may be very popular compared to others.
+The mean for `hours_viewed` is **`r fmt_hours(mean(NETFLIX_DATA$hours_viewed))`** and the median is **`r fmt_hours(median(NETFLIX_DATA$hours_viewed))`**, where the mean is about **`r round(mean(NETFLIX_DATA$hours_viewed) / median(NETFLIX_DATA$hours_viewed), 1)`**x the median. We note a heavily skewed distribution, indicating that some titles may be very popular compared to others.
 
 
 *Note:* we include a table to see which top titles in what period could explain the skewed distribution. 
@@ -206,16 +206,16 @@ The mean for `hours_viewed` is **`r scales::comma(mean(NETFLIX_DATA$hours_viewed
 #| label: eda-gt-top5
 NETFLIX_DATA |>
   slice_max(hours_viewed, n = 5) |>
-  select(title, period, hours_viewed, views) |>
+  select(title, period, hours_viewed) |>
   gt() |>
   tab_header(title = "The 5 Netflix titles with the most Hours Viewed",
-             subtitle = "From the WWW - What We Watched reports") |>
+             subtitle = "The biggest hits in Netflix's WWW reports, starting 2023") |>
   cols_label(title = "Title",
              period = "Period",
-             hours_viewed = "Hours Viewed",
-             views = "Views") |>
-  fmt_number(columns = c(hours_viewed, views),
+             hours_viewed = "Hours Viewed") |>
+  fmt_number(columns = c(hours_viewed),
              suffixing = TRUE, decimals = 1) |>
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1-2026H1") |>
   netflix_theme()
 ```
 
@@ -223,25 +223,27 @@ The most popular titles are seasons from different shows, indicating that the po
 
 ### 3/ Exploratory Questions
 
-Now that we have looked at the dataset structure and gotten an idea of its content, we deep dive into some key representative facts about the WWW report. This allows us to understand the specific content, and not only the statistical components.
+Now that we have looked at the data set structure and gotten an idea of its content, we deep dive into some key representative facts about the WWW report. This allows us to understand the specific content, and not only the statistical components.
 
 
 ```{r}
+#| label: t5-calculations
+#| code-summary: "Show calculations"
 
-#| label: t5-q1-date-range
+# Q1
 date_start <- min(NETFLIX_DATA$period_start)
 date_end <- max(NETFLIX_DATA$period_end)
 
-#| label: t5-q2-number-titles
+# Q2
 n_titles <- n_distinct(NETFLIX_DATA$title)
 
-#| label: t5-q3-bridgerton
+# Q3
 bridgerton_hours <- NETFLIX_DATA |>
   filter(str_detect(title, "Bridgerton")) |>
   summarize(total = sum(hours_viewed)) |>
   pull(total)
 
-#| label: t5-q4-stranger-things
+# Q4
 stranger_things_hours <- NETFLIX_DATA |>
   filter(str_detect(title, "Stranger Things")) |>
   filter_out(str_detect(title, "Beyond")) |>
@@ -250,14 +252,14 @@ stranger_things_hours <- NETFLIX_DATA |>
   summarize(total = sum(hours_viewed)) |>
   pull(total)
 
-#| label: t5-q5-top10
+# Q5
 top10_share <- NETFLIX_DATA |>
   filter(period == "2026H1") |>
   arrange(desc(hours_viewed)) |>
   summarize(share = sum(hours_viewed[1:10]) / sum(hours_viewed)) |>
   pull(share)
 
-#| label: t5-q6-globally-available
+# Q6
 available_globally_by_title <- NETFLIX_DATA |>
   summarize(global = any(available_globally), .by = title) |>
   summarize(share = mean(global)) |>
@@ -269,19 +271,19 @@ available_globally_by_hours <- NETFLIX_DATA |>
   pull(share)
 ```
 
-First, we note that the date ranges from **`r format(date_start, "%B %d, %Y")`** to **`r format(date_end, "%B %d, %Y")`**. The reports thus started since 2023.
+First, we note that the date ranges from **`r format(date_start, "%B %d, %Y")`** to **`r format(date_end, "%B %d, %Y")`**. The reports thus started in 2023.
 
-Besides the total number of entries in the dataset, what is interesting is to see how many distinct titles exist. The total number of shows and movies in the dataset is **`r scales::comma(n_titles)`**. This is very different from the number of entries, **`r scales::comma(nrow(NETFLIX_DATA))`**, confirming that titles may appear several times across periods. 
+Besides the total number of entries in the data set, what is interesting is to see how many distinct titles exist. The total number of shows and movies in the data set is **`r scales::comma(n_titles)`**. This is very different from the number of entries, **`r scales::comma(nrow(NETFLIX_DATA))`**, confirming that titles may appear several times across periods. 
 
-Out of the very popular shows on Netflix, we take a look at the Bridgerton Universe and Stranger Things. While the Bridgerton Universe is broadly viewed with **`r scales::comma(bridgerton_hours)`** total hours, the five seasons of the Stranger Things show accumulate **`r scales::comma(stranger_things_hours)`** total hours. It surpasses the Bridgerton Universe by **`r scales::percent(stranger_things_hours / bridgerton_hours - 1, accuracy = 1)`** (a close race).
+Out of the very popular shows on Netflix, we take a look at the Bridgerton Universe and Stranger Things. While the Bridgerton Universe is broadly viewed with **`r fmt_hours(bridgerton_hours)`** total hours, the five seasons of the Stranger Things show accumulate **`r fmt_hours(stranger_things_hours)`** total hours. It surpasses the Bridgerton Universe by **`r scales::percent(stranger_things_hours / bridgerton_hours - 1, accuracy = 1)`** (a close race).
 
 Another exploration is to see what percentage of the total watch time in the first 6 months of 2026 (2026H1) was spent on the top 10 titles. For 2026H1, **`r scales::percent(top10_share, accuracy = 0.1)`** of watch time was spent on the top 10 titles, out of all **`r scales::comma(sum(NETFLIX_DATA$period == "2026H1"))`** available titles. 
 
-Finally, to get a sense of Netflix's global reach, we look at what fraction of the catalog is available globally by both title and hours viewed. The share of the Netflix catalog available globally is **`r scales::percent(available_globally_by_title, accuracy = 0.1)`** by title, and **`r scales::percent(available_globally_by_hours, accuracy = 0.1)`** weighted by hours viewed. This could explain that shows available globally are more popular in terms of viewership, even with fewer availability compared to the whole catalog. 
+Finally, to get a sense of Netflix's global reach, we look at what fraction of the catalog is available globally by both title and hours viewed. The share of the Netflix catalog available globally is **`r scales::percent(available_globally_by_title, accuracy = 0.1)`** by title, and **`r scales::percent(available_globally_by_hours, accuracy = 0.1)`** weighted by hours viewed. This could explain that shows available globally are more popular in terms of viewership, even with less availability compared to the whole catalog. 
 
 ### 4/ Exploratory Tables
 
-Now we dig deeper into the analysis, by looking at specific change/variation/evolution and more. The granularity is increased for this part, and tables help to visualize the outputs.
+Now we dig deeper into the analysis, by looking at specific aspects of the data set, to compare, evaluate and draw preliminary conclusions. Tables are used to help to visualize the outputs.
 
 The goal is to retrieve the top title (by total hours viewed) in each period, and compare it to total viewership. This helps answer the question: how dominant can a single hit be?
 
@@ -306,9 +308,9 @@ top_by_period |>
   netflix_theme()
 ```
 
-Across periods, similar trends are observed: hours viewed range from **`r fmt_hours(min(top_by_period$hours_viewed))`** to **`r fmt_hours(max(top_by_period$hours_viewed))`**, and the share is relatively the same, from **`r scales::percent(min(top_by_period$share), accuracy = 0.1)`** to **`r scales::percent(max(top_by_period$share), accuracy = 0.1)`**. Suggesting that, although the top title by hours viewed can be much higher than other shows, the share is relatively small, meaning that the viewership is either spread out across the catalog, or that the catalog choice is very extensive.
+Across periods, similar trends are observed: hours viewed range from **`r fmt_hours(min(top_by_period$hours_viewed))`** to **`r fmt_hours(max(top_by_period$hours_viewed))`**, and the share is relatively the same, from **`r scales::percent(min(top_by_period$share), accuracy = 0.1)`** to **`r scales::percent(max(top_by_period$share), accuracy = 0.1)`**. This suggests that, although the top title by hours viewed can be much higher than other shows, the share is relatively small, meaning that the viewership is either spread out across the catalog, or that the catalog choice is very extensive.
 
-Furthermore, as observed in the table, the top titles are TV shows across all periods. Indicating the biggest hits on the platform are recurring popular TV shows (with Bridgerton and Squid Game appearing twice, different seasons).
+Furthermore, as observed in the table, the top titles are TV shows across all periods. This indicates the biggest hits on the platform are recurring popular TV shows (with Bridgerton and Squid Game appearing twice, different seasons).
 
 Now that the top titles have been reviewed, we assess the evolution of available titles and run time across the whole catalog *(2023H1-2026H1)*. Although limited since the reports started in 2023, it matters to see how Netflix evolved across the years and if it impacted the run times. 
 
@@ -331,18 +333,18 @@ catalog_by_period |>
              subtitle = "A steady growth across the catalog, despite a drop in number of titles between 2023H1 and H2") |>
   cols_label(period = "Period",
              n_titles = "Number of Titles",
-             total_runtime_minutes = md("Total Runtime (*minutes*)"),
-             total_runtime_hours = md("Equivalent Total Runtime (*hours*)")) |>
+             total_runtime_minutes = md("Total Run Time (*minutes*)"),
+             total_runtime_hours = md("Equivalent Total Run Time (*hours*)")) |>
   fmt_number(columns = n_titles, decimals = 0) |>
   fmt_number(columns = c(total_runtime_minutes, total_runtime_hours), suffixing = TRUE, decimals = 1) |>
-  tab_footnote(footnote = "Large amount of missing values in the runtime of the 2023H1 period.",
+  tab_footnote(footnote = "Large amount of missing values in the run time of the 2023H1 period.",
                locations = cells_body(columns = c(total_runtime_minutes,
                                                   total_runtime_hours),
                                       rows = period == "2023H1")) |>
-  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1") |>
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1-2026H1") |>
   netflix_theme()
 ```
-2023H1 shows a high number of titles available, with a low total run time value (comparatively to other periods). We note a steep decline in number of titles (by `r scales::percent(1 - catalog_by_period$n_titles[catalog_by_period$period == "2023H2"] / catalog_by_period$n_titles[catalog_by_period$period == "2023H1"], accuracy = 1)`) between 2023H1 and 2023H2. We run a check on missing run time in 2023H1 compared to all other periods. The fraction of missing values reaches **`r scales::percent(missing_by_period$missing_runtime[missing_by_period$period == "2023H1"], accuracy = 1)`** for 2023H1, compared to all other periods with at most **`r scales::percent(max(missing_by_period$missing_runtime[missing_by_period$period != "2023H1"]), accuracy = 0.1)`**. This confirms that there is a high number of missing run time values, thus explaining the low run time.
+2023H1 shows a high number of titles available, with a low total run time value (comparatively to other periods). We note a steep decline in number of titles (by **`r scales::percent(1 - catalog_by_period$n_titles[catalog_by_period$period == "2023H2"] / catalog_by_period$n_titles[catalog_by_period$period == "2023H1"], accuracy = 1)`**) between 2023H1 and 2023H2. We run a check on missing run time in 2023H1 compared to all other periods. The fraction of missing values reaches **`r scales::percent(missing_by_period$missing_runtime[missing_by_period$period == "2023H1"], accuracy = 1)`** for 2023H1, compared to all other periods with at most **`r scales::percent(max(missing_by_period$missing_runtime[missing_by_period$period != "2023H1"]), accuracy = 0.1)`**. This confirms that there is a high number of missing run time values, thus explaining the low run time.
 
 Despite the decline, a steady growth appears in the following periods, without any decline across both number of titles and total run time.
 
@@ -376,16 +378,16 @@ staples |>
   fmt_number(columns = c(avg_hours, min_hours), suffixing = TRUE, decimals = 1) |>
   fmt_percent(columns = cv, decimals = 0) |>
   tab_source_note("Titles present across all reporting periods, ranked by lowest period hours. CV = standard deviation / mean.") |>
-  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1") |>
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1-2026H1") |>
   netflix_theme()
 ```
-This output suggests that, across all periods, the most reliable titles with consistent highest are mostly licensed classics, with one Original exception. 
+This output suggests that, across all periods, the most reliable titles with the consistent highest viewership are mostly licensed classics, with one Original exception. 
 
 We note two different kinds in this table: **`r sum(staples$cv < 0.3)`** shows with rather low variability with 30% as a threshold (between **`r scales::percent(min(staples$cv[staples$cv < 0.3]), accuracy = 1)`** and **`r scales::percent(max(staples$cv[staples$cv < 0.3]), accuracy = 1)`**), and **`r sum(staples$cv >= 0.3)`** shows with high variability (between **`r scales::percent(min(staples$cv[staples$cv >= 0.3]), accuracy = 1)`** and **`r scales::percent(max(staples$cv[staples$cv >= 0.3]), accuracy = 1)`**). Looking at the titles and with common knowledge, we note a potential explanation around new season releases or digital revival, increasing viewership. 
 
 Indeed, when shows have new releases, or digital revivals, it can be assumed that, although viewership is present, the spikes raise their average and variability. The biggest hits center more around new shows, while the most consistent ones are more "older" shows.
 
-What about the share of shows vs movies? The raw dataset doesn't give that indication. To find the answer, we compute two criteria that will be used for the output:
+What about the share of shows vs movies? The raw data set doesn't give that indication. To find the answer, we compute two criteria that will be used for the output:
 
 1. Length: anything over ~4 hours is almost certainly a TV show, not a movie
 2. “Season”: if a title has “Season” or "Limited Series" in it, it is almost certainly a TV show
@@ -413,32 +415,37 @@ shows_movies |>
   cols_label(period = "Period") |>
   fmt_percent(columns = c(Shows, Movies), decimals = 1) |>
   tab_footnote("Note: Show/movie classification based on title keywords and run time over 4 hours.") |>
-  tab_footnote(footnote = "Most runtimes missing in 2023H1, classification relies on title keywords only.",
+  tab_footnote(footnote = "Most run times missing in 2023H1, classification relies on title keywords only.",
                locations = cells_body(columns = c(Shows, Movies),
                                       rows = period == "2023H1")) |>
-  tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1") |>
+  tab_source_note("Source: Netflix What We Watched reports, 2023H1-2026H1") |>
   netflix_theme()
 ```
 We note a common pattern across all periods, with an average of **`r scales::percent(mean(shows_movies$Shows[shows_movies$period != "2023H1"]), accuracy = 0.1)`** viewing time for shows and **`r scales::percent(mean(shows_movies$Movies[shows_movies$period != "2023H1"]), accuracy = 0.1)`** for movies. We exclude 2023H1 from these averages for the same reason mentioned above, the **`r scales::percent(missing_by_period$missing_runtime[missing_by_period$period == "2023H1"], accuracy = 1)`** missing run time. 
 
 Based on the rule, titles with missing run times are classified based solely on the presence of keywords such as "season". This may expose an issue in the ratio shows vs movies in 2023H1 versus all other periods.
 
-5. How does the performance of live events compare to pre-taped content? Does the average live event draw more viewership than an average piece of pre-taped content? How about a ‘top tier’ live event vs ‘top tier’ pre-taped content?
+Furthermore, we note that there is a specific variable, which flags a given title as a `live_event` or not. Live Events are programs that stream live on Netflix. It's a specific format, an innovative strategy for Netflix (who traditionally runs pre-recorded content), varying from sports events to comedy specials.
 
-[Before: why it matters, given Netflix's push into live sports and events]
+*Note*: we note that viewership will almost certainly be lower for Live Events, as it's short "one-shot" content. Therefore, the analysis cannot only compare purely hours_viewed to get a real sense of popularity by viewership.
 
 ```{r}
 #| label: t6-q5-live-events
-NETFLIX_DATA |>
-  mutate(type = if_else(live_event, "Live Events", "Pre-taped")) |>
+live_vs_taped <- NETFLIX_DATA |>
+  summarize(hours = sum(hours_viewed),
+            live = any(live_event),
+            .by = title) |>
+  mutate(type = if_else(live, "Live Events", "Pre-taped")) |>
   summarize(n_titles = n(),
-            avg_hours = mean(hours_viewed),
-            median_hours = median(hours_viewed),
-            top10_avg_hours = mean(head(sort(hours_viewed, decreasing = TRUE), 10)),
-            .by = type) |>
+            avg_hours = mean(hours),
+            median_hours = median(hours),
+            top10_avg_hours = mean(head(sort(hours, decreasing = TRUE), 10)),
+            .by = type)
+
+live_vs_taped |>
   gt() |>
-  tab_header(title = "TITLE TO DO",
-             subtitle = "TAKEAWAY TO DO") |>
+  tab_header(title = "Comparison of Pre-taped and Live Events Content Viewership",
+             subtitle = "Although Pre-taped performs higher in hours viewed, Live Events can create value in high 'one-shot' viewership") |>
   cols_label(type = "Content Type",
              n_titles = "Titles",
              avg_hours = "Avg. Hours",
@@ -447,12 +454,23 @@ NETFLIX_DATA |>
   fmt_number(columns = n_titles, decimals = 0) |>
   fmt_number(columns = c(avg_hours, median_hours, top10_avg_hours),
              suffixing = TRUE, decimals = 1) |>
-  tab_source_note("Top 10 Avg. = mean hours of the 10 most-watched titles in each group.") |>
+  tab_source_note("Hours summed per title across all periods. Top 10 Avg. = average hours of the 10 most-watched titles in each group.") |>
   tab_source_note("Source: Netflix What We Watched reports, 2023H1–2026H1") |>
   netflix_theme()
 ```
 
-[After: answer both of his sub-questions, average vs. average AND top tier vs. top tier, with the caveat that live events are few and short, so hours favor long pre-taped series]
+The number of distinct titles for each category confirms that, traditionally, Netflix runs more Pre-taped content than Live Events (**`r scales::comma(live_vs_taped$n_titles[live_vs_taped$type == "Pre-taped"])`** vs. **`r scales::comma(live_vs_taped$n_titles[live_vs_taped$type == "Live Events"])`**).
+
+However, when we look at the median hours viewed, which isn't affected by outliers (e.g. big hits in Pre-taped content), we see that it's almost identical across both (**`r fmt_hours(live_vs_taped$median_hours[live_vs_taped$type == "Pre-taped"])`** for Pre-taped and **`r fmt_hours(live_vs_taped$median_hours[live_vs_taped$type == "Live Events"])`** for Live Events). This indicates that the typical titles for each category perform similarly, even though hours viewed averages are very different (**`r fmt_hours(live_vs_taped$avg_hours[live_vs_taped$type == "Pre-taped"])`** vs. **`r fmt_hours(live_vs_taped$avg_hours[live_vs_taped$type == "Live Events"])`**).
+
+Finally, we analyze "top tiers" with a top 10 viewership figure for each category, and we notice a big gap between a **`r fmt_hours(live_vs_taped$top10_avg_hours[live_vs_taped$type == "Pre-taped"])`** average hours for Pre-taped content and **`r fmt_hours(live_vs_taped$top10_avg_hours[live_vs_taped$type == "Live Events"])`** for Live Events. That is **`r round(live_vs_taped$top10_avg_hours[live_vs_taped$type == "Pre-taped"] / live_vs_taped$top10_avg_hours[live_vs_taped$type == "Live Events"])`**x more.
+
+A few plausible explanations include:
+
+1. The popularity of Pre-taped content outshines Live Events in terms of lifetime. TV shows have been running and are being watched for a long time, thus surpassing Live Events which are more punctual and recent
+2. The average length of a TV show (being the dominating type in Netflix's catalog, as noted before) is much longer than a one-shot Live Event (with a rough estimation of 8-10 hours for TV shows and 3 hours for Live Events). Even if median hours are almost identical, a TV show will almost always count for more hours viewed.
+
+Both types create value in a different way. Pre-taped content will shine on the long run, with more viewership across the years (and spikes with hits), whereas "one-shot" Live Events do create value by building a high audience in one moment (which can bring a lot of adjacent revenues such as advertising, sponsorship etc.).
 
 ### 5/ Strategy Memo (with visualization)
 
@@ -462,7 +480,7 @@ NETFLIX_DATA |>
 
 ::: {.callout-note title="AI Usage Statement" collapse="true"}
 
-Claude was used to help with the code in this project. Help included answering to questions about different ideas for improving the code and the rendering, debugging code, cross-checking, ideas on improving tables etc. All non-code text was generated without the use of any Generative AI tools. Additionally, Claude was used to provide explanations in very simple terms, additional background information on the topic and to brainstorm ideas.
+Claude was used to help with the code in this project. Help included answering to questions about different ideas for improving the code and the rendering, debugging code, cross-checking, ideas on improving tables etc. All non-code text was generated without the use of any Generative AI tools. Additionally, Claude was used to provide explanations in very simple terms, additional background information on the topic (e.g. what are Netflix's live events), and to brainstorm ideas.
 
 :::
 
