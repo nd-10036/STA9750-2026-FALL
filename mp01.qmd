@@ -48,7 +48,29 @@ netflix_theme <- function(tbl) {
 # Formatting for hours
 fmt_hours <- scales::label_number(accuracy = 0.1,
                                   scale_cut = scales::cut_short_scale())
+
+# Netflix formatting for ggplot charts
+ggplot_theme_netflix <- function() {
+  theme_minimal(base_size = 12) +
+    theme(plot.background = element_rect(fill = "#141414", color = NA),
+          panel.background = element_rect(fill = "#141414", color = NA),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.y = element_line(color = "#333333"),
+          text = element_text(color = "white"),
+          axis.text = element_text(color = "#B3B3B3"),
+          plot.title = element_text(face = "bold", size = 16),
+          plot.subtitle = element_text(color = "#B3B3B3"),
+          plot.caption = element_text(color = "#808080", size = 8),
+          legend.position = "top",
+          legend.justification = "left")
+}
 ```
+
+<br>
+
+{{< contents strategy-memo >}}
+
 
 ***What is the Netflix What We Watched Report?***
 
@@ -472,11 +494,71 @@ A few plausible explanations include:
 
 Both types create value in a different way. Pre-taped content will shine on the long run, with more viewership across the years (and spikes with hits), whereas "one-shot" Live Events do create value by building a high audience in one moment (which can bring a lot of adjacent revenues such as advertising, sponsorship etc.).
 
-### 5/ Strategy Memo (with visualization)
+::: {#strategy-memo style="border-left: 6px solid #E50914; background-color: #F7F7F7; padding: 1.5em; border-radius: 6px; margin-bottom: 3em;"}
 
 
+### Strategy Memo
 
+1. Recommendation summary (2-3 sentences)
+2. Global originals + licensed base (global vs. licensed): 24.6% of titles → 52.1% of viewing; staples are mostly licensed
 
+```{r}
+#| label: memo-chart
+#| echo: false
+global_chart <- tibble(
+  measure = factor(rep(c("Share of titles", "Share of hours viewed"), each = 2),
+                   levels = c("Share of titles", "Share of hours viewed")),
+  availability = rep(c("Global", "Regional"), times = 2),
+  share = c(available_globally_by_title, 1 - available_globally_by_title,
+            available_globally_by_hours, 1 - available_globally_by_hours)
+)
+
+ggplot(global_chart, aes(x = measure, y = share, fill = availability)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = scales::percent(share, accuracy = 1)),
+            position = position_stack(vjust = 0.5),
+            color = "white", fontface = "bold", size = 5) +
+  scale_fill_manual(values = c("Global" = netflix_red, "Regional" = "#564D4D")) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "[TITLE TO DO]",
+       subtitle = "[KEY TAKEWAY TO DO]",
+       x = NULL, y = NULL, fill = NULL,
+       caption = "Source: Netflix What We Watched reports, 2023H1-2026H1") +
+  ggplot_theme_netflix()
+```
+
+3. Live events as a complement (big hits vs. long tail): typical live ≈ typical pre-taped; no blockbusters; value through simultaneous audiences
+
+```{r}
+#| label: memo-live-chart
+#| echo: false
+live_chart <- live_vs_taped |>
+  select(type, median_hours, avg_hours, top10_avg_hours) |>
+  pivot_longer(-type, names_to = "metric", values_to = "hours") |>
+  mutate(metric = factor(metric,
+                         levels = c("median_hours", "avg_hours", "top10_avg_hours"),
+                         labels = c("Typical title\n(median)",
+                                    "Average title",
+                                    "Top 10 titles\n(average)")))
+
+ggplot(live_chart, aes(x = metric, y = hours, fill = type)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  geom_text(aes(label = fmt_hours(hours)),
+            position = position_dodge(width = 0.7),
+            vjust = -0.4, color = "white", size = 3.5) +
+  scale_y_log10(labels = fmt_hours) +
+  scale_fill_manual(values = c("Live Events" = netflix_red,
+                               "Pre-taped" = "#564D4D")) +
+  labs(title = "[TITLE TO DO]",
+       subtitle = "[KEY TAKEAWAY TO DO]",
+       x = NULL, y = "Hours viewed per title (log scale)", fill = NULL,
+       caption = "Hours summed per title across all periods. Source: Netflix What We Watched reports, 2023H1-2026H1") +
+  ggplot_theme_netflix()
+```
+
+4. Limitations (hours favor long content; 2023H1 gaps, revenues streams missing)
+
+:::
 
 ::: {.callout-note title="AI Usage Statement" collapse="true"}
 
