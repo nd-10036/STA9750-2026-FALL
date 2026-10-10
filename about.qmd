@@ -22,7 +22,7 @@ about:
 Last Updated: `r format(Sys.time(), "%A %B %d, %Y at %I:%M %p")`
 :::
 
-<div style="text-align: justify">
+<div style="text-align: left">
 
 ## About me
 

@@ -4,8 +4,6 @@ image: images/headshot.jpg
 engine: knitr
 ---
 
-<div style="text-align: justify">
-
 ## Welcome
 
 ![](images/headshot.jpg){width=100px fig-align="left"}
@@ -16,8 +14,6 @@ Check out my website to learn more about me:
 
 - About page (bio, experiences, education, projects, resume etc.)\
 - Mini-Projects (what I've been working on with R)\
-
-</div>
 
 
 ```{r}
