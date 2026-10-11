@@ -35,6 +35,7 @@ format:
       text: |
         <style>
           strong, b { font-weight: 900; }
+          .small-heading h2, .small-heading h3 { font-size: 1.1rem; }
         </style>
 
 editor:
