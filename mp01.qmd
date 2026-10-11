@@ -600,7 +600,7 @@ gini <- function(y) {
    }
 ```
 
-The Gini Coefficient is a mathematical formula used to measure inequality in a given distribution. The best example is when measuring inequality in income distribution. The math is simple: the lower the coefficient, the more equal the distribution is. The same logic work the other way around; the higher the coefficient, the higher the inequality. The percentage range in the output is as follows: 0 representing a perfect equality and 100 a perfect inequality, where one value takes it all.
+The Gini Coefficient is a mathematical formula used to measure inequality in a given distribution. The best example is when measuring inequality in income distribution (Wikipedia, n.d.-a). The math is simple: the lower the coefficient, the more equal the distribution is. The same logic work the other way around; the higher the coefficient, the higher the inequality. The percentage range in the output is as follows: 0 representing a perfect equality and 100 a perfect inequality, where one value takes it all.
 
 Below is an example of the output the formula will give, on two different sets:
 
@@ -716,7 +716,7 @@ table_top_global <- top_global |>
     table.width = pct(60)
   ) |>
   tab_footnote(
-    footnote = "Based on research per title, and the logic of Netflix-made content vs. content licensed to Netflix (What's on Netflix, 2023; CJ Newsroom, 2024; Wikipedia, n.d.)",
+    footnote = "Based on research per title, and the logic of Netflix-made content vs. content licensed to Netflix (What's on Netflix, 2023; CJ Newsroom, 2024; Wikipedia, n.d.-b)",
     locations = cells_title(groups = "subtitle")
   ) |>
   netflix_theme()
@@ -835,7 +835,7 @@ The research also found that the most watched titles available globally are main
 table_top_global
 ```
 
-The Netflix briefing backs this fact, stating that 55% of viewership are Originals (in 2023H1, Rev, 2023). However, as seen above, we note that top global titles in terms of hours viewed also contain licensed shows with worldwide rights: King the Land, Queen of Tears and Pablo Escobar (What's on Netflix, 2023; CJ Newsroom, 2024; Wikipedia, n.d.).
+The Netflix briefing backs this fact, stating that 55% of viewership are Originals (in 2023H1, Rev, 2023). However, as seen above, we note that top global titles in terms of hours viewed also contain licensed shows with worldwide rights: King the Land, Queen of Tears and Pablo Escobar (What's on Netflix, 2023; CJ Newsroom, 2024; Wikipedia, n.d.-b).
 
 Focusing on developing global Original content and acquiring global licensed content will most likely support the continuity in the upward viewership trajectory.
 
@@ -875,7 +875,8 @@ Proposed next steps include:
 - Netflix (2023, updated 2024). *What We Watched: A Netflix Engagement Report*. Netflix Newsroom. [about.netflix.com](https://about.netflix.com/en/news/what-we-watched-a-netflix-engagement-report).
 - Rev (2023). *Netflix Shares Detailed Viewing Figures for the First Time* [Transcript of Netflix press briefing]. Rev. [rev.com](https://www.rev.com/transcripts/netflix-shares-detailed-viewing-figures-for-the-first-time-transcript).
 - The Hollywood Reporter (2024). *Netflix Ad Tier Update: Users Surge, Christmas Day NFL Games Sold Out*. The Hollywood Reporter. [hollywoodreporter.com](https://www.hollywoodreporter.com/business/business-news/netflix-ad-tier-update-users-surge-christmas-day-nfl-games-sold-out-1236058896/).
-- Wikipedia (n.d.). *Pablo Escobar, The Drug Lord*. Wikipedia. [en.wikipedia.org](https://en.wikipedia.org/wiki/Pablo_Escobar,_The_Drug_Lord).
+- Wikipedia (n.d.-a). *Gini coefficient*. Wikipedia. [en.wikipedia.org](https://en.wikipedia.org/wiki/Gini_coefficient).
+- Wikipedia (n.d.-b). *Pablo Escobar, The Drug Lord*. Wikipedia. [en.wikipedia.org](https://en.wikipedia.org/wiki/Pablo_Escobar,_The_Drug_Lord).
 - What's on Netflix (2023). *'King the Land' Netflix K-Drama Season 1*. What's on Netflix. [whats-on-netflix.com](https://www.whats-on-netflix.com/news/king-the-land-netflix-k-drama-season-1-everything-we-know-so-far/).
 
 :::
