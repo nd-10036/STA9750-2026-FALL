@@ -514,7 +514,7 @@ A few plausible explanations include:
 
 Both types create value in a different way. Pre-taped content will shine on the long run, with more viewership across the years (and spikes with hits), whereas "one-shot" Live Events do create value by building a high audience in one moment (which can bring a lot of adjacent revenues such as advertising, sponsorship etc.).
 
-### Memo: Supporting Code {.small-heading}
+## Memo: Supporting Code {.small-heading}
 
 ```{r}
 #| label: memo-trend-code
@@ -659,7 +659,7 @@ The hours viewed alone for a given title doesn't measure its success (Netflix, 2
 
 :::
 
-### Sources {.small-heading}
+## Sources {.small-heading}
 
 ::: {.small}
 - Netflix logo © Netflix, Inc. Image from [You Wiki (Fandom)](https://you.fandom.com/wiki/Netflix).
