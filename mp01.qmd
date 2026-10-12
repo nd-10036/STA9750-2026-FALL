@@ -587,7 +587,7 @@ A few plausible explanations include:
 
 Both types create value in a different way. Pre-taped content will shine on the long run, with more viewership across the years (and spikes with hits), whereas "one-shot" Live Events do create value by building a high audience in one moment (which can bring a lot of adjacent revenues such as advertising, sponsorship etc.).
 
-### Extra Analysis: the Gini coefficient {.small-heading}
+### 6/ Extra Analysis: the Gini coefficient
 
 ```{r}
 #| label: ec-gini-function
@@ -595,9 +595,11 @@ Both types create value in a different way. Pre-taped content will shine on the 
 gini <- function(y) {
   y <- sort(y[!is.na(y)])
   n <- length(y)
-  if (n == 0) return(NA)
+  if (n == 0) {
+    return(NA)
+  }
   (2 / n) * sum(seq_len(n) * y) / sum(y) - (n + 1) / n
-   }
+}
 ```
 
 The Gini Coefficient is a mathematical formula used to measure inequality in a given distribution. The best example is when measuring inequality in income distribution (Wikipedia, n.d.-a). The math is simple: the lower the coefficient, the more equal the distribution is. The same logic work the other way around; the higher the coefficient, the higher the inequality. The percentage range in the output is as follows: 0 representing a perfect equality and 100 a perfect inequality, where one value takes it all.
@@ -609,6 +611,13 @@ Below is an example of the output the formula will give, on two different sets:
 2. [0, 0, 0, 0, 100], with a coefficient of: **`r scales::percent(gini(c(0, 0, 0, 0, 100)), accuracy = 1)`**
 
 The first set shows perfect equality, with **`r scales::percent(gini(c(10, 10, 10, 10, 10)), accuracy = 1)`**, in both the values and the coefficient, with only tens. When we change the set with only zeros and a 100, the coefficient climbs to **`r scales::percent(gini(c(0, 0, 0, 0, 100)), accuracy = 1)`**, demonstrating inequality in the set. Since there are only 5 values, the maximum coefficient can only reach **`r scales::percent(gini(c(0, 0, 0, 0, 100)), accuracy = 1)`**.
+
+We test another example. Suppose a country has only 5 citizens, and their incomes are as follows:
+
+1. Citizen: [Alice, Barbara, Carol, Debbie, Emily]
+2. Income: [20k, 200k, 0k, 50k, 40k]
+
+We run the coefficient and find **`r scales::percent(gini(c(20, 200, 0, 50, 40)), accuracy = 0.1)`**. This result indicates a fairly high inequality in the income data set (which stands to reason when looking at the income with 0k and 200k opposites).
 
 Now, we take a look at the Netflix data set. There are two different ways we can run the coefficient:
 
@@ -626,17 +635,23 @@ Since the two variables appears to have limitations, we run and analyze both in 
 #| code-summary: "Show Gini Coefficient table code"
 gini_by_period <- NETFLIX_DATA |>
   filter_out(period == "2023H1") |>
-  summarize(gini_hours = gini(hours_viewed),
-            gini_views = gini(views),
-            .by = period)
+  summarize(
+    gini_hours = gini(hours_viewed),
+    gini_views = gini(views),
+    .by = period
+  )
 
 gini_by_period |>
   gt() |>
-  tab_header(title = "[TITLE TO DO]",
-             subtitle = "[KEY TAKEAWAY TO DO]") |>
-  cols_label(period = "Period",
-             gini_hours = "Gini (Hours Viewed)",
-             gini_views = "Gini (Views)") |>
+  tab_header(
+    title = "Gini Coefficient Applied to Hours Viewed and Views",
+    subtitle = "High, stable inequality across all periods, indicating high viewership on popular titles"
+  ) |>
+  cols_label(
+    period = "Period",
+    gini_hours = "Gini (Hours Viewed)",
+    gini_views = "Gini (Views)"
+  ) |>
   fmt_percent(columns = c(gini_hours, gini_views), decimals = 1) |>
   tab_source_note("Note 1: 2023H1 omitted from the data due to a different scope.") |>
   tab_source_note("Note 2: titles with less than 50,000 hours of watch time are omitted from the reports.") |>
@@ -645,7 +660,22 @@ gini_by_period |>
 ```
 No matter what the variable, all outputs from the Gini Coefficient show a stable, high inequality in the data. The lowest score for Hours Viewed is **`r scales::percent(min(gini_by_period$gini_hours), accuracy = 0.1)`** in **`r gini_by_period$period[which.min(gini_by_period$gini_hours)]`** and reaches up to **`r scales::percent(max(gini_by_period$gini_hours), accuracy = 0.1)`** in **`r gini_by_period$period[which.max(gini_by_period$gini_hours)]`**. Similarly, the lowest score for Views is **`r scales::percent(min(gini_by_period$gini_views), accuracy = 0.1)`** in **`r gini_by_period$period[which.min(gini_by_period$gini_views)]`** and reaches up to **`r scales::percent(max(gini_by_period$gini_views), accuracy = 0.1)`** in **`r gini_by_period$period[which.max(gini_by_period$gini_views)]`**.
 
-This is a clear indicator of popular, big hits titles taking over the attention compared to other titles in a given period. Popular titles (no matter the origin) have a tendency to dominate Netflix's viewership.
+But why compare hours viewed and views? Hours viewed will systematically be higher than views (as explained earlier). Hours viewed measure the total time spent on a title, whereas views estimates how many people watched a title (although noting that the estimation is limited). Views thus favor reach over quantity, in terms of how many people watched a title, removing the inequality in length of a TV show vs. a movie.
+
+The inequality therefore comes mostly from popularity and not length (since the views estimation removes the length issue). The views Gini are only **`r scales::number(mean(gini_by_period$gini_hours - gini_by_period$gini_views) * 100, accuracy = 0.1)`** percentage points lower than hours viewed Gini. The results are thus a clear indicator of popular, big hits titles taking over the attention compared to other titles in a given period. Popular titles (no matter the origin) have a tendency to dominate Netflix's viewership.
+
+### 7/ Conclusion
+
+The data in the What We Watched Netflix reports proved to be valuable. It brought key insights into data quality, catalog substance, viewership and content typology that allows to make estimations for future content strategies. Main findings include:
+
+1. we note a steady growth over the years, broken down by periods (since 2023H2)
+2. Globally vs. Regionally available content: global content lead in viewership despite not being the main type available in the catalog
+3. Viewership concentration gravitate around popular titles that absorb the majority of viewership
+4. Live Events vs. Pre-taped content: Live Events attract high one-shot viewership and adjacent revenue, while Pre-taped content ensure high viewership through big hits
+
+Although limited in cross-reference data (such as revenue streams, world presence break downs etc.), we get a sense of what is popular on the platform, what could be improved and what customers actually watch. 
+
+This analysis once again proved how valuable it is to analyze performance based on real data, to understand and offer adapted content that will bring novelty and retain loyalty in a given product.
 
 ### Memo: Supporting Code {.small-heading}
 
@@ -800,7 +830,7 @@ chart_live <- ggplot(live_chart, aes(x = metric, y = hours, fill = type)) +
 **DATE**: October 16, 2026\
 **SUBJECT**: Strategic Recommendation to inform the 2027 Content Strategy\
 
-*Number of words*: 632 (excluding charts and tables)
+*Number of words*: 736 (excluding charts and tables)
 
 For the 2027 content strategy, we recommend focusing on globally available titles while retaining quality in local catalogs, and developing more Live Events to drive adjacent revenues generated by high short-lived, event-driven viewership.
 
@@ -837,9 +867,11 @@ table_top_global
 
 The Netflix briefing backs this fact, stating that 55% of viewership are Originals (in 2023H1, Rev, 2023). However, as seen above, we note that top global titles in terms of hours viewed also contain licensed shows with worldwide rights: King the Land, Queen of Tears and Pablo Escobar (What's on Netflix, 2023; CJ Newsroom, 2024; Wikipedia, n.d.-b).
 
-Focusing on developing global Original content and acquiring global licensed content will most likely support the continuity in the upward viewership trajectory.
+Focusing on developing global Original content and acquiring globally licensed content will most likely support the continuity in the upward viewership trajectory.
 
-A typical (median) title performs as well for both categories, with **`r fmt_hours(live_vs_taped$median_hours[live_vs_taped$type == "Live Events"])`** for Live Events vs. **`r fmt_hours(live_vs_taped$median_hours[live_vs_taped$type == "Pre-taped"])`** for Pre-taped in hours viewed. However, the average title is higher in terms of hours viewed for Pre-taped, with **`r fmt_hours(live_vs_taped$avg_hours[live_vs_taped$type == "Pre-taped"])`** vs. **`r fmt_hours(live_vs_taped$avg_hours[live_vs_taped$type == "Live Events"])`** for Live Events. This makes sense, because Pre-taped titles have a longer historical presence in Netflix's catalog history and big hits (e.g. Stranger Things) drive the average up, thus having a higher viewership.
+A typical (median) title performs as well for both categories, with **`r fmt_hours(live_vs_taped$median_hours[live_vs_taped$type == "Live Events"])`** for Live Events vs. **`r fmt_hours(live_vs_taped$median_hours[live_vs_taped$type == "Pre-taped"])`** for Pre-taped in hours viewed. However, the average title is higher in terms of hours viewed for Pre-taped, with **`r fmt_hours(live_vs_taped$avg_hours[live_vs_taped$type == "Pre-taped"])`** vs. **`r fmt_hours(live_vs_taped$avg_hours[live_vs_taped$type == "Live Events"])`** for Live Events. It stands to reason because Pre-taped titles have a longer historical presence in Netflix's catalog history and big hits (e.g. Stranger Things) drive the average up, thus having a higher viewership.
+
+Another calculation further supports this argument: the Gini Coefficient, which is commonly used to assess an inequality in any given distribution (with 0% having no inequality and 100% being a perfect inequality). The calculation measures the inequality in the share of viewership across titles. The metric views was used as it's the closest at estimating how many people watched a title. The results show a high, stable inequality in the viewership with a minimum of **`r scales::percent(min(gini_by_period$gini_views), accuracy = 0.1)`** and a maximum of **`r scales::percent(max(gini_by_period$gini_views), accuracy = 0.1)`** across studied periods (2023H2-2026H1). This calculation thus concludes that high popularity content (across all content type) seizes most viewership in the catalog.
 
 ```{r}
 #| label: memo-live-chart
