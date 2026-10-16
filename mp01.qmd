@@ -953,7 +953,7 @@ Proposed next steps include:
 
 ::: {.callout-note title="AI Usage Statement" collapse="true"}
 
-Claude was used to help in developing the code in this project. All non-code text was generated without the use of any Generative AI tools. Help included answering the creator's prompts about ideas for improving the code and the rendering (e.g. creating a Netflix theme), debugging code, cross-checking, improving tables etc.  Additionally, Claude was used to provide explanations in very simple terms, additional background information on the topic (e.g. what Netflix's live events are), and to brainstorm ideas for the analysis.
+Claude was used to help develop the code in this project. All non-code text was written by me, without the use of any Generative AI tools. Help included answering my prompts about ideas for improving the code and the rendering (e.g. creating a Netflix theme), debugging code, cross-checking, improving tables etc. The code was run and assessed by me, and I made the decisions on the analysis myself. Additionally, Claude was used to provide explanations in very simple terms, additional background information on the topic (e.g. what Netflix's live events are), and to brainstorm ideas for the analysis.
 
 :::
 
