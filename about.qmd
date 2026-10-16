@@ -30,6 +30,8 @@ Hello world, welcome to my page! I'm Nastassjia Durand, a current graduate stude
 
 Orginially from Paris, France, I spent a total of 8 years abroad (5 in Oslo, Norway, 1 in Moscow, Russia and a little over 2 years in New York, US). My passion is learning - I love working on different projects, in different industries, going back to school to acquire new skills... All that with one objective - taking messy situations/problems, understanding them, leveraging internal and external knowledge to analyze these problems and offer tailored solutions. I love to navigate ambiguity/grey areas in order to make things work.
 
+[View my resume](https://drive.google.com/file/d/1dnv0r7P2SC_PIpQ0gcT9UW98lH2Nr4CN/view?usp=sharing)
+
 #### Professional experiences
 
 I've been working for 5+ years in project management, consulting and strategy, across financial services, digital innovation and sustainability at the following companies: 
@@ -68,7 +70,5 @@ Bachelor of Management | May 2020
 ###### Professional Experience 
 - Rider verbatim analysis (MTA) - Python, pandas, scikit-learn, NLP - cleaned and analyzed ~17,000 rider verbatim and built branch-level insight dashboards (qualitative and quantitative) to deliver strategic recommendations to leadership\
 - Infrastructure fund/transaction benchmarking (BNP Paribas) - researched and reviewed 20+ infrastructure funds and 500+ transactions to analyze specific market positioning of interest to the team, and identified shifts in priorities\
-
-[View my resume](https://drive.google.com/file/d/1dnv0r7P2SC_PIpQ0gcT9UW98lH2Nr4CN/view?usp=sharing)
 
 </div>
