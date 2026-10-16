@@ -7,9 +7,11 @@ format:
   html:
     code-fold: true
     code-summary: "Show code"
+    code-tools: true
     toc: true
 ---
---------------
+
+***
 ::: {.small}
 Last Updated: `r format(Sys.time(), "%A %B %d, %Y at %I:%M %p")`
 :::
