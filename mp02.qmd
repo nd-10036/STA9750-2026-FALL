@@ -91,6 +91,12 @@ fmt_ratio <- function(x) paste0(round(x, 1), "×")
 fmt_big   <- function(x) scales::label_number(scale_cut = scales::cut_short_scale(), accuracy = 0.1)(x)
 ```
 
+```{=html}
+<style>
+svg text { letter-spacing: normal !important; word-spacing: normal !important; }
+</style>
+```
+
 <br>
 
 ### Press Release {#pr-title}
@@ -104,11 +110,11 @@ The following analysis explores the relationship between energy data, public tra
 
 ### 2/ Data Acquisition
 
-We base our analysis on three different sources, all from 2025 data:
+We base our analysis on three different sources:
 
-1. **EIA State Electricity Profiles** - provides each state’s grid CO2 per MWh, used for electricity
-2. **NTD Energy** - details energy consumption across different energy types (with different units: gallons, kWh and kg)
-3. **NTD Service** - provides mode and type of service for each agency (e.g. bus, subway etc.)
+1. **EIA State Electricity Profiles** (2024 data) - provides each state’s grid CO2 per MWh, used for electricity
+2. **NTD Energy** (2025 data) - details energy consumption across different energy types (with different units: gallons, kWh and kg)
+3. **NTD Service** (2025 data) - provides mode and type of service for each agency (e.g. bus, subway etc.), trips, passenger miles, and links the associated state across the analysis
 
 Each data source provides a layer of information required to determine CO2 emissions per agency, the related energy source and how clean it can be.
 
@@ -552,7 +558,7 @@ data_issues <- tribble(
     "Assumed B20 based on DOE common blend (with sensitivity check in Task 6)",
   "NTD Energy", "Energy under-reported compared to service (e.g. 0 gallons for one mode with millions of trips)",
     "Found in Task 5 (outlier check)",
-    "Excluded below 0.01 lbs CO2 per passenger mile (Tasks 5-6)",
+    "Excluded below 0.01 lbs CO2 per passenger mile in Task 6",
   # Across tables
   "Across tables", "Mode stored as two-letter codes (Task 2)",
     paste(n_modes_energy, "codes"), "Separate cleaning step below the table",
@@ -1048,13 +1054,20 @@ fuel_totals <- fuel_long |>
 # Plotting time
 ggplot(fuel_totals, aes(x = total, y = reorder(fuel, total), fill = unit)) +
   geom_col(width = 0.7) +
-  geom_text(aes(label = label_number(scale_cut = cut_short_scale(), accuracy = 0.1)(total)),
-            hjust = -0.1, size = 3.2, color = "#4A4A4A") +
+  geom_text(aes(label = label_number(scale_cut = cut_short_scale(), accuracy = 0.1)(total),
+                color = unit),
+            hjust = -0.1, size = 3.2, fontface = "bold") +
   ggforce::facet_col(vars(unit), scales = "free", space = "free") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale()),
                      expand = expansion(mult = c(0, 0.15))) +
   scale_fill_manual(
     values = c("Fuels (gallons)" = "#8C8C8C", 
+               "Electricity (kWh)" = gta_green,
+               "Hydrogen (kg)"     = gta_brown),
+    guide = "none"
+  ) +
+  scale_color_manual(
+    values = c("Fuels (gallons)" = "#8C8C8C",
                "Electricity (kWh)" = gta_green,
                "Hydrogen (kg)"     = gta_brown),
     guide = "none"
@@ -1141,7 +1154,7 @@ share_nyct_upt <- sum(upt_by_service$total_upt[upt_by_service$NTD_ID == "20008"]
 ggplot(top5_upt, aes(x = total_upt, y = reorder(str_wrap(service, 35), total_upt))) +
   geom_col(fill = gta_green) +
   geom_text(aes(label = label_number(scale_cut = cut_short_scale(), accuracy = 0.1)(total_upt)),
-            hjust = -0.1, size = 3.5, color = "#4A4A4A") +
+            hjust = -0.1, size = 3.5, color = gta_green, fontface = "bold") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale()),
                      expand = expansion(mult = c(0, 0.15))) +
   labs(
@@ -1242,7 +1255,7 @@ After assessing how clean the electricity produced and consumed is, what energy 
 The goal is to obtain the total CO2 emissions per agency + mode pair. To do this, we use industry standards and data: 
 
 - NTD Energy 2025 data detailing energy use across different energy types (with different units: gallons, kWh and kg)
-- EIA State Electricity Profiles (U.S. EIA, n.d.-c): each state’s grid CO2 per MWh, used for electricity
+- EIA State Electricity Profiles (U.S. EIA, 2025): each state’s grid CO2 per MWh, used for electricity
 - EIA Carbon Dioxide Emissions Coefficients (U.S. EIA, 2024): lbs of CO2 per gallon for each fuel, plus natural gas per thousand cubic feet
 - DOE (U.S. DOE, n.d.) gasoline gallon equivalent (EPAct) used to convert CNG and LNG into gasoline gallon equivalents
 
@@ -1451,13 +1464,24 @@ top10_long <- emissions |>
     Electricity = co2_elec_lbs / lbs_per_ton
   ) |>
   select(service, co2_total_tons, Fuel, Electricity) |>
-  pivot_longer(c(Fuel, Electricity), names_to = "source", values_to = "tons")
+  pivot_longer(c(Fuel, Electricity), names_to = "source", values_to = "tons") |>
+  mutate(service = fct_reorder(service, co2_total_tons)) |>
+  group_by(service) |>
+  mutate(dominant = source[which.max(tons)]) |>
+  ungroup()
+
+# One label per bar: total CO2, colored by the dominant source
+top10_labels <- distinct(top10_long, service, co2_total_tons, dominant)
 
 # Plotting time
-ggplot(top10_long, aes(x = tons, y = reorder(service, co2_total_tons), fill = source)) +
+ggplot(top10_long, aes(x = tons, y = service, fill = source)) +
   geom_col(width = 0.7) +
+  geom_text(data = top10_labels,
+            aes(x = co2_total_tons, y = service, label = fmt_big(co2_total_tons), color = dominant),
+            inherit.aes = FALSE, hjust = -0.1, size = 3.3, fontface = "bold") +
+  scale_color_manual(values = c("Fuel" = "#8C8C8C", "Electricity" = gta_green), guide = "none") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale()),
-                     expand = expansion(mult = c(0, 0.05))) +
+                     expand = expansion(mult = c(0, 0.12))) +
   scale_fill_manual(values = c("Fuel" = "#8C8C8C", "Electricity" = gta_green)) +
   labs(
     title = "The 10 Largest Transit Emitters",
@@ -1634,7 +1658,7 @@ ggplot(scatter_df, aes(x = total_upt, y = co2_total_tons, color = main_source)) 
   scale_alpha_manual(values = c("Mostly fuel" = 0.35, "Mostly electricity" = 0.85), guide = "none") +
   labs(
     title = "Bigger Systems Emit More, But Not Equally",
-    subtitle = "The higher UPT, the more CO2 emissions",
+    subtitle = "The higher the UPT, the more CO2 emissions",
     x = "Unlinked passenger trips (log scale)",
     y = "CO2 emitted, metric tons (log scale)",
     color = NULL,
@@ -1951,11 +1975,12 @@ Who is the best overall? **`r best_overall[["Agency Name"]]`** (**`r best_overal
 
 **Note:** **`r n_flagged_winners`** winners are flagged as likely inaccurate by the NTD (kept: **`r paste(winners[["Agency Name"]][winners$any_flagged], collapse = ", ")`**, which can slightly bias the results).
 
-Since reading a lot of text with complicated calculations is not for everyone, we visualize the results with an interactive map.
 
 ```{=html}
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Results by State</div>
 ```
+
+Since reading a lot of text with complicated calculations is not for everyone, we visualize the results with an interactive map.
 
 ```{r}
 #| label: t6-state-map
@@ -1997,16 +2022,17 @@ states_sf <- usmap::us_map(regions = "states") |>
 p_map <- ggplot(states_sf) +
   geom_sf_interactive(aes(fill = log_per_mile, tooltip = tip, data_id = abbr),
                       color = "white", linewidth = 0.3) +
-  # Diverging: green = cleaner than U.S. average, brown = dirtier; darker = further from average
   scale_fill_gradient2(
     low = gta_green, mid = "#F4F1EA", high = gta_brown,
     midpoint = log10(us_per_mile), na.value = "#D9D6CF",
-    name = "lbs CO2 per\npassenger mile",
+    name = "lbs CO2 per passenger mile",
     labels = function(x) round(10^x, 2)
   ) +
+  guides(fill = guide_colorbar(title.position = "top",
+                               barwidth = unit(14, "lines"), barheight = unit(0.5, "lines"))) +
   labs(
-    title    = "[TODO: your title]",
-    subtitle = "[TODO: your one-line takeaway]",
+    title    = "Profile per State with Overall lbs CO2 per Passenger Mile",
+    subtitle = "An interactive map detailing, for each state, the number of agencies, the cleanest one, share of CO2 from electricity and grid emissions (hover over to get the details)",
     caption  = str_wrap(paste0("Light = close to the U.S. average (", round(us_per_mile, 2),
                                " lbs per passenger mile); log scale. Grey = no agency kept. ",
                                "States with few agencies can be driven by one agency. ",
@@ -2020,7 +2046,7 @@ p_map <- ggplot(states_sf) +
     plot.caption          = element_text(size = 8, color = "#8C8C8C", hjust = 0),
     plot.title.position   = "plot",
     plot.caption.position = "plot",
-    legend.position       = "right",
+    legend.position       = "bottom",
     legend.title          = element_text(size = 9, color = "#4A4A4A"),
     legend.text           = element_text(size = 8.5, color = "#4A4A4A"),
     plot.margin           = margin(10, 10, 10, 10)
@@ -2382,8 +2408,8 @@ p_avoided <- ggplot(top_avoided, aes(y = reorder(name, avoided_tons))) +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale()),
                      expand = expansion(mult = c(0, 0.3))) +
   labs(
-    title    = "[TODO: your title]",
-    subtitle = "[TODO: your one-line takeaway]",
+    title    = "Avoided Emissions Across the Top 5 Agencies",
+    subtitle = "An interactive chart detailing, for each agency, CO2 emissions emitted in each scenario (hover over each bar to get the details)",
     x = "Metric tons of CO2", y = NULL, fill = NULL,
     caption  = str_wrap(paste0("Driving: CAFE ", cafe_mpg, " mpg new car, 1 person per car (NHTSA, 2022). ",
                                "Source: NTD 2025; U.S. EIA"), 110)
@@ -2448,8 +2474,8 @@ p_missed <- ggplot(missed_peers, aes(x = co2_lbs_per_mile, y = 0)) +
                 expand = expansion(mult = c(0.03, 0.12))) +
   scale_y_continuous(limits = c(-0.5, 0.5), breaks = NULL) +
   labs(
-    title    = "[TODO: your title]",
-    subtitle = "[TODO: your one-line takeaway]",
+    title    = "Amount of CO2 per Passenger Mile Emitted Among All Medium Agencies",
+    subtitle = "An interactive chart showing the spread across agencies (hover over each dot to see the exact lbs CO2 per passenger mile)",
     x = "lbs of CO2 per passenger mile (log scale)", y = NULL,
     caption  = str_wrap(paste0("Each dot = one ", tolower(missed$size), " agency. Source: NTD 2025; U.S. EIA"), 110)
   ) +
@@ -2500,16 +2526,16 @@ chart_missed <- girafe(
 ```
 
 ::: {style="font-size: 1.4em; font-weight: bold; color: #FFFFFF; ..."}
-Given current gas prices, shouldn't we all move to clean electrification?
+Given current gas prices, shouldn't we all take transit while agencies switch to clean electricity?
 :::
 
 ::: {style="font-size: 1em; line-height: 1.5; color: #DDE5D2; background-color: rgba(255,255,255,0.06); padding: 0.9em 1.2em 0.1em 1.2em; border-radius: 6px; margin-bottom: 1.5em;"}
-*The Green Transit Alliance* is happy to present this year's most awaited winners of the GTA Green Transit Awards. We applaud **`r greenest[["Agency Name"]]`** (**`r greenest$state`**) as the greenest agency, **`r winner_avoided[["Agency Name"]]`** which doubles up with the most emissions avoided and clean grid champion in **`r champion$state`**. We, however, shame **`r missed[["Agency Name"]]`** (**`r missed$state`**) for the biggest Missed Opportunity (misses a chance to be great, but still wins an award).
+*The Green Transit Alliance* is happy to present this year's most awaited winners of the GTA Green Transit Awards. We applaud **`r greenest[["Agency Name"]]`** (**`r greenest$state`**) as the greenest agency, **`r winner_avoided[["Agency Name"]]`** in **`r winner_avoided$state`**, which wins both the most emissions avoided and clean grid champion. We, however, shame **`r missed[["Agency Name"]]`** (**`r missed$state`**) for the biggest missed opportunity (misses a chance to be great, but still wins an award).
 :::
 
 **New York, NY - November 6, 2026 -** Dear readers, this year has been particularly interesting. For the first time, we enriched our Data & Analytics capabilities by cross-referencing valuable sources for the awards. Our team went above and beyond the expected process by including not only the overall energy consumption NTD data source, but also the EIA State Electricity Profile to add an additional layer to associate with our NTD Service report. 
 
-This allowed the GTA to publish this highly curated report that details: how much energy each agency consumes (NTD Energy), how much transit a given agency delivers and where (NTD Service) and, finally, how clean the electricity produced by state is (EIA). As transit electrification amplified, we wanted to take a closer look at the electricity produced, since its quality can only be as clean as the grid that powers it. We hope, with this granularity, to give more insights into the U.S. landscape and keep expanding our capabilities to cover larger areas in the world each year. 
+This allowed the GTA to publish this highly curated report that details: how much energy each agency consumes (NTD Energy), how much transit a given agency delivers and where (NTD Service) and, finally, how clean the electricity produced in each state is (EIA). As transit electrification grew, we wanted to take a closer look at the electricity produced, since its quality can only be as clean as the grid that powers it. We hope, with this granularity, to give more insights into the U.S. landscape and keep expanding our capabilities to cover larger areas in the world each year. 
 
 Take a look at the detailed results below, and we're happy to receive any feedback to improve our activities.
 
@@ -2544,16 +2570,14 @@ As a comparison, the typical agency emits **`r round(median_per_mile_all, 2)`** 
 
 For this particular award, we used industry assumptions (CAFE standard, **`r cafe_mpg`** mpg, one person per car) to compare CO2 emissions in this report with CO2 emissions if transit riders had driven new cars. We subtract the actual CO2 emissions from the CO2 from driving (assumed).
 
-The agency that managed to avoid the most emissions is **`r winner_avoided[["Agency Name"]]`**, with **`r fmt_big(winner_avoided$avoided_tons)`** metric tons avoided. As a comparison, driving would emit **`r fmt_ratio(winner_avoided$car_vs_transit)`** more CO2. We also note that only **`r n_avoid`** of **`r n_avoided_all`** agencies avoid CO2 at all.
+The agency that managed to avoid the most emissions is **`r winner_avoided[["Agency Name"]]`**, with **`r fmt_big(winner_avoided$avoided_tons)`** metric tons avoided. As a comparison, driving would emit **`r fmt_ratio(winner_avoided$car_vs_transit)`** more CO2. We also note that **`r n_avoid`** of **`r n_avoided_all`** agencies avoid CO2 at all (against new cars only).
 
-::: {style="letter-spacing: normal;"}
 
 ```{r}
 #| label: pr-chart-avoided
 #| echo: false
 chart_avoided
 ```
-:::
 
 :::
 
@@ -2590,13 +2614,11 @@ Fair game; we had to find the worst-of this year. What if we told you that an ag
 
 That's the case for **`r missed[["Agency Name"]]`** in **`r missed$state`**, with **`r round(missed$co2_lbs_per_mile, 2)`** lbs per passenger mile. To put in perspective, this represents **`r fmt_ratio(missed_times)`** its group median (**`r round(missed_median, 2)`**), in a state whose grid is **`r fmt_ratio(missed_grid_ratio)`** cleaner than average. We expect some improvement for next year, **`r missed[["Agency Name"]]`**!
 
-::: {style="letter-spacing: normal;"}
 ```{r}
 #| label: pr-chart-missed
 #| echo: false
 chart_missed
 ```
-:::
 
 :::
 
@@ -2630,15 +2652,15 @@ P.S.: please refrain from sending us inquiries about when the video game will fi
 - U.S. DOE (2021). *Biodiesel* [Energy Saver fact sheet]. U.S. Department of Energy. [energy.gov](https://www.energy.gov/sites/default/files/2021-11/EnergySavers_Biodiesel_Factsheet-v2.pdf).
 - U.S. DOE (n.d.). *Fuel Conversion Factors to Gasoline Gallon Equivalents*. U.S. Department of Energy, Energy Policy Act (EPAct) Transportation Regulatory Activities. [epact.energy.gov](https://epact.energy.gov/fuel-conversion-factors).
 - U.S. EIA (2024). *Carbon Dioxide Emissions Coefficients*. U.S. Energy Information Administration. [eia.gov](https://www.eia.gov/environment/emissions/co2_vol_mass.php).
+- U.S. EIA (2025). *State Electricity Profiles*. U.S. Energy Information Administration. [eia.gov](https://www.eia.gov/electricity/state/).
 - U.S. EIA (n.d.-a). *Biodiesel and the environment*. U.S. Energy Information Administration, Energy Explained. [eia.gov](https://www.eia.gov/energyexplained/biofuels/biodiesel-and-the-environment.php).
 - U.S. EIA (n.d.-b). *Energy Sources*. U.S. Energy Information Administration, Energy Kids. [eia.gov](https://www.eia.gov/kids/energy-sources).
-- U.S. EIA (n.d.-c). *State Electricity Profiles*. U.S. Energy Information Administration. [eia.gov](https://www.eia.gov/electricity/state/).
 
 :::
 
 ::: {.callout-note title="AI Usage Statement" collapse="true"}
 
-Claude was used to help develop the code in this project. All non-code text was written by me, without the use of any Generative AI tools. Help included answering my prompts about ideas for improving the code and the rendering (e.g. creating a Green theme), debugging code, cross-checking, improving tables etc. The code was run and assessed by me, and I made the decisions on the analysis myself. Additionally, Claude was used to provide explanations in very simple terms, logo generation, additional background information on the topic (e.g. xxx), and to brainstorm ideas for the analysis.
+Claude was used to help develop the code in this project. All non-code text was written by me, without the use of any Generative AI tools. Help included answering my prompts about ideas for improving the code and the rendering (e.g. creating a Green theme), debugging code, cross-checking, improving tables etc. The code was run and assessed by me, and I made the decisions on the analysis myself. Additionally, Claude was used to provide explanations in very simple terms, logo generation, additional background information on the topic (e.g. industry standards, other research), and to brainstorm ideas for the analysis.
 
 :::
 
