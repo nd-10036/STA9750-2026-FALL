@@ -1770,19 +1770,8 @@ size_summary <- agency_norm |>
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Filtering Steps</div>
 ```
 
-**Start** - we begin with **`r fmt_num(n_agencies_all)`** agencies.
-
-**Filter 1** - we check for agencies with 0 trips and get **`r fmt_num(n_no_trips)`**. Also, since we choose to remove agencies with under **`r fmt_num(min_upt)`** trips (agencies below 100k per year have less than ~275 trips a day, which is too small to compare), we check and get **`r fmt_num(n_tiny_dropped)`** agencies dropped.
-
-**Filter 2** - we also exclude agencies that are over the minimum number of trips (**`r fmt_num(min_upt)`**) but have 0 CO2 emissions and we get **`r fmt_num(n_zero_emissions)`** agencies. If agencies have 0 CO2, it means that no energy is reported (therefore irrelevant for this analysis).
-
-**Filter 3** - we choose to remove agencies where the overall reported CO2 is under 0.01 lbs per passenger mile, which concerns **`r fmt_num(n_underreported)`** agencies.
-
-**Filter 4** - we decide to remove agencies with a large mode (1M+ trips) under 0.01 lbs per passenger mile (similar to the **`r outlier_dot[["Agency Name"]]`** outlier example), to avoid any further bias in the results. This concerns **`r fmt_num(n_underreported_mode)`** agencies.
-
-**End** - after the above filtering steps, we end up with **`r fmt_num(n_agencies_kept)`** agencies that will be distributed into groups based on size. 
-
-**Note:** we have kept **`r fmt_num(n_no_miles)`** agencies with no passenger miles (missing per-mile value). **`r fmt_num(n_agencies_kept - n_no_miles)`** of them can be ranked per mile.
+![Filtering steps, from all agencies to the agencies ranked in this section (made in Canva)](images/mp02_filtering_steps.png){width=100% fig-align="center"}
+At the start, we have **`r fmt_num(n_agencies_all)`** agencies. We drop **`r fmt_num(n_no_trips + n_tiny_dropped)`** at Filter 1, **`r fmt_num(n_zero_emissions)`** at Filter 2, **`r fmt_num(n_underreported)`** at Filter 3 and **`r fmt_num(n_underreported_mode)`** at Filter 4. We end with **`r fmt_num(n_agencies_kept)`** agencies. **`r fmt_num(n_no_miles)`** agencies don't have any passenger miles, which leaves the final number of agencies rankable per mile: **`r fmt_num(n_agencies_kept - n_no_miles)`**.
 
 ```{=html}
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Summary: final agency data set split in groups</div>
