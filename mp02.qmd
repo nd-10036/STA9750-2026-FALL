@@ -98,7 +98,7 @@ fmt_big   <- function(x) scales::label_number(scale_cut = scales::cut_short_scal
 
 ### 1/ Introduction
 
-The following analysis explores the relationship between energy data, public transit agencies and associated CO2 emissions, across the U.S. The goal is to assess which agencies are the cleanest and dirtiest, based on the energy they consumed, provided by the states where they operate. Based on the full analysis, we write a press release written by The Green Transit Alliance, which annually rewards agencies based on the previous year's data. 
+The following analysis explores the relationship between energy data, public transit agencies and associated CO2 emissions, across the U.S. The goal is to assess which agencies are the cleanest and dirtiest, based on the energy they consumed, provided by the states where they operate. Based on the full analysis, we write a press release for The Green Transit Alliance, which annually rewards agencies based on the previous year's data. 
 
 ### 2/ Data Acquisition
 
@@ -106,9 +106,9 @@ We base our analysis on three different sources, all from 2025 data:
 
 1. **EIA State Electricity Profiles** - provides each state’s grid CO2 per MWh, used for electricity
 2. **NTD Energy** - details energy consumption across different energy types (with different units: gallons, kWh and kg)
-3. **NTD Service** - provides mode and type of service for each agency (e.g. bus, suway etc.)
+3. **NTD Service** - provides mode and type of service for each agency (e.g. bus, subway etc.)
 
-Each data source provide a layer of information required to determiner CO2 emissions per agency, the related energy source and how clean it can be.
+Each data source provides a layer of information required to determine CO2 emissions per agency, the related energy source and how clean it can be.
 
 #### 2.1 EIA State Electricity Profiles {.small-heading}
 
