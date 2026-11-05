@@ -491,7 +491,7 @@ We first take a look at each data source individually, to assess the data type, 
 
 Overall, we see a complete table, with **`r fmt_pct(eia_na_share)`** missing values. The table contains **`r eia_rows`** rows (one per state) with **`r eia_types["numeric"]`** numeric and **`r eia_types["character"]`** text columns. We note **`r n_sources`** primary sources of energy (**`r paste(sort(unique(EIA_SEP_REPORT$primary_source)), collapse = ", ")`**). 
 
-We take a closer look at the `CO2_MWh` distribution, ranging from **`r fmt_num(co2_min)`** to **`r fmt_num(co2_max)`** lbs/MWh, with a mean of **`r fmt_num(co2_mean)`** and a median of **`r fmt_num(co2_median)`**. This indicates a right-skewed distribution (since the mean is above the median). After looking at the skewed distribution, we notice that states share a similar primary source of energy (mainly Natural Gas, with **`r n_gas_states`** states and a median of **`r fmt_num(gas_median)`** lbs/MWh), while some of them still rely on coal (**`r n_coal_states`** states, with a median of **`r fmt_num(coal_median)`** lbs/MWh). To understand the gap, we note that coal-primary states have a median **`r fmt_ratio(coal_median / gas_median)`** higher than gas-primary states. The states relying on coal are: **`r paste(coal_states, collapse = ", ")`**. Of the top 10 dirtiest states, **`r n_coal_top10`** are coal states. 
+We take a closer look at the `CO2_MWh` distribution, which ranges from **`r fmt_num(co2_min)`** to **`r fmt_num(co2_max)`** lbs/MWh (a mean of **`r fmt_num(co2_mean)`** and median of **`r fmt_num(co2_median)`**). This indicates a right-skewed distribution (since the mean is above the median). After looking at the skewed distribution, we notice that states share a similar primary source of energy (mainly Natural Gas, with **`r n_gas_states`** states and a median of **`r fmt_num(gas_median)`** lbs/MWh), while some of them still rely on coal (**`r n_coal_states`** states, with a median of **`r fmt_num(coal_median)`** lbs/MWh). To understand the gap, we note that coal-primary states have a median **`r fmt_ratio(coal_median / gas_median)`** higher than gas-primary states. The states relying on coal are: **`r paste(coal_states, collapse = ", ")`**. Of the top 10 dirtiest states, **`r n_coal_top10`** are coal states. 
 
 ```{=html}
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">2. NTD Energy</div>
@@ -1113,7 +1113,7 @@ top_gal_fuels <- fuel_totals |>
 h2_total <- fuel_totals |> filter(unit == "Hydrogen (kg)") |> pull(total) |> sum()
 ```
 
-**Electricity** totals **`r fmt_big(elec_total)`** kWh. We can suppose this coincides with the progressive shift to electricity as a greener alternative to fossil fuels across the world. Furthermore, the APTA report mentions 6.4 billion kWh of electricity used for propulsion in 2024, which follows a reported ridership growth (+10% from 2023 to 2024). 
+**Electricity** totals **`r fmt_big(elec_total)`** kWh (which tends to coincide with a progressive shift to electricity as a greener alternative to fossil fuels across the world). Furthermore, the APTA report mentions 6.4 billion kWh of electricity used for propulsion in 2024, which follows a reported ridership growth (+10% from 2023 to 2024). 
 
 **`r top_gal_fuels$fuel[1]`** (traditional) and **`r top_gal_fuels$fuel[2]`** (alternative to diesel) lead the gallon-based fuels (with **`r fmt_big(top_gal_fuels$total[1])`** and **`r fmt_big(top_gal_fuels$total[2])`** gallons respectively). **Hydrogen**, on the contrary, is not widely used, with only **`r fmt_big(h2_total)`** kg. Overall, we see a concentrated energy mix in the most widely used energy types. A few fuels (**`r paste(top_gal_fuels$fuel, collapse = ", ")`**) power U.S. public transit, as well as electricity. These 4 will have a significant weight in the green vs. dirty story.
 
@@ -1800,7 +1800,7 @@ size_summary <- agency_norm |>
 
 At the start, we have **`r fmt_num(n_agencies_all)`** agencies. We drop **`r fmt_num(n_no_trips + n_tiny_dropped)`** at Filter 1, **`r fmt_num(n_zero_emissions)`** at Filter 2, **`r fmt_num(n_underreported)`** at Filter 3 and **`r fmt_num(n_underreported_mode)`** at Filter 4. We end with **`r fmt_num(n_agencies_kept)`** agencies. **`r fmt_num(n_no_miles)`** agencies don't have any passenger miles, which leaves the final number of agencies rankable per mile: **`r fmt_num(n_agencies_kept - n_no_miles)`**.
 
-**Note:** 11 agencies were already dropped earlier in this analysis (DC and the territories), thus starting the filtering with **`r fmt_num(n_agencies_all)`** agencies.
+**Note:** **`r fmt_num(n_agencies_energy - n_agencies_all)`** agencies were already dropped earlier in this analysis (DC and the territories), thus starting the filtering with **`r fmt_num(n_agencies_all)`** agencies.
 
 ```{=html}
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Summary: final agency data set split in groups</div>
