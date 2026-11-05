@@ -2488,6 +2488,8 @@ chart_missed <- girafe(
 
 :::: {#press-release style="background-color: #4A7C59; color: #FFFFFF; padding: 2em; border-radius: 8px; margin-bottom: 3em;"}
 
+### Press Release
+
 ![](images/gta_logo.svg){style="float: right; width: 30%; background-color: #FFFFFF; padding: 0.6em; border-radius: 6px; margin: 0 0 1em 1em;"}
 
 [FOR IMMEDIATE RELEASE]{style="color: #DDE5D2; font-weight: bold; letter-spacing: 2px; font-size: 0.85em;"}
