@@ -2032,7 +2032,7 @@ p_map <- ggplot(states_sf) +
                                barwidth = unit(14, "lines"), barheight = unit(0.5, "lines"))) +
   labs(
     title    = "Profile per State with Overall lbs CO2 per Passenger Mile",
-    subtitle = "An interactive map detailing, for each state, the number of agencies, the cleanest one, share of CO2 from electricity and grid emissions (hover over to get the details)",
+    subtitle = str_wrap("An interactive map detailing, for each state, the number of agencies, the cleanest one, share of CO2 from electricity and grid emissions (hover over to get the details)", 95),
     caption  = str_wrap(paste0("Light = close to the U.S. average (", round(us_per_mile, 2),
                                " lbs per passenger mile); log scale. Grey = no agency kept. ",
                                "States with few agencies can be driven by one agency. ",
@@ -2409,7 +2409,7 @@ p_avoided <- ggplot(top_avoided, aes(y = reorder(name, avoided_tons))) +
                      expand = expansion(mult = c(0, 0.3))) +
   labs(
     title    = "Avoided Emissions Across the Top 5 Agencies",
-    subtitle = "An interactive chart detailing, for each agency, CO2 emissions emitted in each scenario (hover over each bar to get the details)",
+    subtitle = str_wrap("An interactive chart detailing, for each agency, CO2 emissions emitted in each scenario (hover over each bar to get the details)", 90),
     x = "Metric tons of CO2", y = NULL, fill = NULL,
     caption  = str_wrap(paste0("Driving: CAFE ", cafe_mpg, " mpg new car, 1 person per car (NHTSA, 2022). ",
                                "Source: NTD 2025; U.S. EIA"), 110)
@@ -2475,7 +2475,7 @@ p_missed <- ggplot(missed_peers, aes(x = co2_lbs_per_mile, y = 0)) +
   scale_y_continuous(limits = c(-0.5, 0.5), breaks = NULL) +
   labs(
     title    = "Amount of CO2 per Passenger Mile Emitted Among All Medium Agencies",
-    subtitle = "An interactive chart showing the spread across agencies (hover over each dot to see the exact lbs CO2 per passenger mile)",
+    subtitle = str_wrap("An interactive chart showing the spread across agencies (hover over each dot to see the exact lbs CO2 per passenger mile)", 90),
     x = "lbs of CO2 per passenger mile (log scale)", y = NULL,
     caption  = str_wrap(paste0("Each dot = one ", tolower(missed$size), " agency. Source: NTD 2025; U.S. EIA"), 110)
   ) +
