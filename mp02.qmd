@@ -1771,6 +1771,7 @@ size_summary <- agency_norm |>
 ```
 
 ![Filtering steps, from all agencies to the agencies ranked in this section (made in Canva)](images/mp02_filtering_steps.png){width=100% fig-align="center"}
+
 At the start, we have **`r fmt_num(n_agencies_all)`** agencies. We drop **`r fmt_num(n_no_trips + n_tiny_dropped)`** at Filter 1, **`r fmt_num(n_zero_emissions)`** at Filter 2, **`r fmt_num(n_underreported)`** at Filter 3 and **`r fmt_num(n_underreported_mode)`** at Filter 4. We end with **`r fmt_num(n_agencies_kept)`** agencies. **`r fmt_num(n_no_miles)`** agencies don't have any passenger miles, which leaves the final number of agencies rankable per mile: **`r fmt_num(n_agencies_kept - n_no_miles)`**.
 
 ```{=html}
