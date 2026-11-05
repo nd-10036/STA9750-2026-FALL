@@ -106,7 +106,7 @@ svg text { letter-spacing: normal !important; word-spacing: normal !important; }
 
 ### 1/ Introduction
 
-The following analysis explores the relationship between energy data, public transit agencies and associated CO2 emissions, across the U.S. The goal is to assess which agencies are the cleanest and dirtiest, based on the energy they consumed, provided by the states where they operate. Based on the full analysis, we write a press release for The Green Transit Alliance, which annually rewards agencies based on the previous year's data. 
+The following analysis explores the relationship between energy data, public transit agencies and associated CO2 emissions, across the U.S. The goal is to assess which agencies are the cleanest and dirtiest, based on the fuel they burned and the electricity they consumed, which is provided by the grid of the state where they operate. Based on the full analysis, we write a press release for The Green Transit Alliance, which annually rewards agencies based on the previous year's data. 
 
 ### 2/ Data Acquisition
 
@@ -2561,7 +2561,7 @@ Given current gas prices, shouldn't we all take transit while agencies switch to
 :::
 
 ::: {style="font-size: 1em; line-height: 1.5; color: #DDE5D2; background-color: rgba(255,255,255,0.06); padding: 0.9em 1.2em 0.1em 1.2em; border-radius: 6px; margin-bottom: 1.5em;"}
-*The Green Transit Alliance* is happy to present this year's most awaited winners of the GTA Green Transit Awards. We applaud **`r greenest[["Agency Name"]]`** (**`r greenest$state`**) as the greenest agency, **`r winner_avoided[["Agency Name"]]`** in **`r winner_avoided$state`**, which wins both the most emissions avoided and clean grid champion. We, however, shame **`r missed[["Agency Name"]]`** (**`r missed$state`**) for the biggest missed opportunity (misses a chance to be great, but still wins an award).
+*The Green Transit Alliance* is happy to present this year's most awaited winners of the GTA Green Transit Awards. We applaud **`r greenest[["Agency Name"]]`** (**`r greenest$state`**) as the greenest agency, and **`r winner_avoided[["Agency Name"]]`** (**`r winner_avoided$state`**), which wins both the most emissions avoided and clean grid champion awards. We, however, shame **`r missed[["Agency Name"]]`** (**`r missed$state`**) for the biggest missed opportunity (misses a chance to be great, but still wins an award).
 :::
 
 **New York, NY - November 6, 2026 -** Dear readers, this year has been particularly interesting. For the first time, we enriched our Data & Analytics capabilities by cross-referencing valuable sources for the awards. Our team went above and beyond the expected process by including not only the overall energy consumption NTD data source, but also the EIA State Electricity Profiles to add an additional layer to associate with our NTD Service report. 
