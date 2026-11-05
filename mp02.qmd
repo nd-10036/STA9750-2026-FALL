@@ -93,7 +93,7 @@ fmt_big   <- function(x) scales::label_number(scale_cut = scales::cut_short_scal
 
 <br>
 
-### Press Release
+### Press Release {#pr-title}
 
 {{< contents press-release >}}
 
