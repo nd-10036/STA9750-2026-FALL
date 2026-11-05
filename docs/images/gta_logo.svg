@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 160" width="460" height="160" role="img" aria-label="Green Transit Alliance logo">
+  <!-- Badge -->
+  <circle cx="80" cy="80" r="64" fill="#2E5E3A"/>
+  <circle cx="80" cy="80" r="56" fill="none" stroke="#A7C957" stroke-width="2"/>
+
+  <!-- Leaf -->
+  <path d="M 50 112 C 48 72, 74 44, 114 44 C 116 84, 90 112, 50 112 Z" fill="#E8F0E3"/>
+
+  <!-- Transit line as the leaf's midrib, with three stops -->
+  <path d="M 56 106 L 106 52" stroke="#2E5E3A" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="66" cy="95" r="5" fill="#A7C957" stroke="#2E5E3A" stroke-width="2.5"/>
+  <circle cx="81" cy="79" r="5" fill="#A7C957" stroke="#2E5E3A" stroke-width="2.5"/>
+  <circle cx="96" cy="63" r="5" fill="#A7C957" stroke="#2E5E3A" stroke-width="2.5"/>
+
+  <!-- Wordmark -->
+  <text x="164" y="80" font-family="Helvetica, Arial, sans-serif" font-size="46" font-weight="700" letter-spacing="6" fill="#2E5E3A">GTA</text>
+  <rect x="166" y="92" width="44" height="3" fill="#A7C957"/>
+  <text x="164" y="120" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="3" fill="#7F5539">GREEN TRANSIT ALLIANCE</text>
+</svg>
