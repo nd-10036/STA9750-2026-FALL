@@ -545,7 +545,7 @@ data_issues <- tribble(
   "NTD Service", "Missing passenger miles",
     paste(scales::percent(service_na_miles, accuracy = 1), "of rows"), "Kept as is: a real gap in the source, limited to small services (2.2% of total UPT)",
   "NTD Service", "Zero UPT or zero passenger miles",
-    paste(n_zero_upt, "zero UPT /", n_zero_miles, "zero miles"), "Filtered out in Task 6 (per-trip and per-mile metrics)",
+    paste(n_zero_upt, "zero UPT /", n_zero_miles, "zero miles"), "Handled later in Task 6",
   "NTD Service", "Flagged as likely inaccurate",
     paste(n_flagged, "rows"), "Kept as is and marked in Task 6 rankings",
   # NTD Energy
@@ -1262,6 +1262,7 @@ The goal is to obtain the total CO2 emissions per agency + mode pair. To do this
 For the fuels, we calculate *gallons × lbs of CO2 per gallon* (EIA coefficients). Each NTD fuel is matched to the closest EIA fuel (see the table below). For natural gas, CNG and LNG are converted to gasoline gallon equivalents (DOE EPAct), then the EIA natural gas factor is applied. For electricity, we first convert kWh to MWh and then multiply by the state’s CO2 per MWh (EIA State Electricity Profiles, via the state join). 
 
 We also leverage industry expertise to make the following assumptions:
+
 - DOE biodiesel fact sheet (U.S. DOE, 2021) to set biodiesel as B20 (as the common blend, since the blend is unknown after the import)
 - EIA, Biodiesel and the environment (U.S. EIA, n.d.-a) to explain why biofuel CO2 is counted as 0 (left out of national totals, and biofuels are a small share in gallons used by transit)
 - APTA recommended practice (APTA, 2009) to follow the industry standard for transit emissions (grid factors for electricity)
@@ -1528,6 +1529,7 @@ We get a sense of which agencies emit the most. However, there are potential lim
 - Since the biodiesel blend is unknown (we assumed B20 for everyone), results can be biased (looking at the original data set, blends vary from B5 to B100, and Minnesota changes by season according to the Minnesota Department of Agriculture (n.d.)). We will do a sensitivity check in the following task
 - For this analysis, every agency in a state gets the same CO2 per MWh. However, transit agencies draw their energy from different providers (such as local utilities or regional grids) 
 - We have agencies with no energy data (thus no estimate) and DC and the territories have no EIA grid (dropped from this analysis)
+- We found that, in the NTD file, the ethanol and hydrogen columns are identical, therefore duplicates. Results are unaffected (both count as 0 CO2), and these aren't widely used across the analysis (thus kept)
 - As previously seen, NTD has flagged some records as "likely inaccurate" (which can weigh on the quality of the data). These records have been kept and flagged accordingly
 - We also make approximate conversions, where CNG and LNG go through energy equivalents (GGE), not measured CO2
 - Some agencies under-report their energy consumption and are excluded below a 0.01 lbs CO2 per passenger mile threshold (to avoid these agencies being flagged as some of the cleanest due to a lack of reporting)
@@ -1575,7 +1577,7 @@ emissions |>
 
 
 ```{=html}
-<div style="background-color: #2E5E3A; color: #FFFFFF; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Next Steps</div>
+<div style="background-color: #2E5E3A; color: #FFFFFF; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Emissions vs. Trips Analysis</div>
 ```
 
 We mentioned that emissions are higher when the number of trips is larger. We get a sense by cross-analyzing CO2 emissions and UPT (unlinked passenger trips). Results shown in the plot below:
@@ -1798,13 +1800,15 @@ size_summary <- agency_norm |>
 
 At the start, we have **`r fmt_num(n_agencies_all)`** agencies. We drop **`r fmt_num(n_no_trips + n_tiny_dropped)`** at Filter 1, **`r fmt_num(n_zero_emissions)`** at Filter 2, **`r fmt_num(n_underreported)`** at Filter 3 and **`r fmt_num(n_underreported_mode)`** at Filter 4. We end with **`r fmt_num(n_agencies_kept)`** agencies. **`r fmt_num(n_no_miles)`** agencies don't have any passenger miles, which leaves the final number of agencies rankable per mile: **`r fmt_num(n_agencies_kept - n_no_miles)`**.
 
+**Note:** 11 agencies were already dropped earlier in this analysis (DC and the territories), thus starting the filtering with **`r fmt_num(n_agencies_all)`** agencies.
+
 ```{=html}
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Summary: final agency data set split in groups</div>
 ```
 
 1. Small - **`r size_summary$n_agencies[size_summary$size == "Small"]`** agencies, accounting for **`r fmt_pct(mean(agency_norm$total_upt < 1e6))`** of kept agencies
 2. Medium - **`r size_summary$n_agencies[size_summary$size == "Medium"]`** agencies, accounting for **`r fmt_pct(mean(agency_norm$total_upt >= 1e6 & agency_norm$total_upt < 25e6))`** of kept agencies
-3. Large - **`r size_summary$n_agencies[size_summary$size == "Large"]`** agencies, accounting for **`r fmt_pct(mean(agency_norm$total_upt >= 25e6))`** of kept agencies
+3. Large - **`r size_summary$n_agencies[size_summary$size == "Large"]`** agencies (after joins and filters), accounting for **`r fmt_pct(mean(agency_norm$total_upt >= 25e6))`** of kept agencies
 
 ```{r}
 #| label: t6-values
@@ -2033,7 +2037,7 @@ p_map <- ggplot(states_sf) +
   labs(
     title    = "Profile per State with Overall lbs CO2 per Passenger Mile",
     subtitle = str_wrap("An interactive map detailing, for each state, the number of agencies, the cleanest one, share of CO2 from electricity and grid emissions (hover over to get the details)", 95),
-    caption  = str_wrap(paste0("Light = close to the U.S. average (", round(us_per_mile, 2),
+    caption  = str_wrap(paste0("Light = close to the U.S. overall value, all trips combined (", round(us_per_mile, 2),
                                " lbs per passenger mile); log scale. Grey = no agency kept. ",
                                "States with few agencies can be driven by one agency. ",
                                "Source: NTD 2025; U.S. EIA"), 110)
@@ -2366,7 +2370,7 @@ This allowed us to establish, step by step, a ranking of CO2 emissions by U.S. t
 
 1. An energy mix composed of electricity and fuels (with diesel in first position) dominates agency consumption across the country to power public transit.
 2. The grid that powers the electricity consumed by an agency matters - if agencies use electricity produced by a dirty grid, their emissions rise.
-3. The largest agencies, like NYC Transit are the busiest, given the number of trips for some of the busiest cities in the country. Thus, total emissions follow the size of the agency (bigger agencies emit more CO2).
+3. The largest agencies, like NYC Transit, are the busiest, given the number of trips for some of the busiest cities in the country. Thus, total emissions follow the size of the agency (bigger agencies emit more CO2).
 4. Converting different energy sources to a single metric allowed us to find the associated CO2 emissions per agency.
 5. Given the high variability in city/agency/operations sizes, normalizing sizes by grouping agencies in 3 different buckets proved to be valuable, to easily compare agencies with similar sizes. We find that larger agencies are cleaner per passenger mile.
 6. Winners have been defined using curated metrics, with the City of Seattle (Greenest Transit Agency), MTA NYC Transit (2 times winner with Most Emissions Avoided and Clean Grid Champion) and a big flop with the City of Glendale (Missed Opportunity, an agency whose fleet relies only on fuel, in a clean-grid state).
@@ -2560,7 +2564,7 @@ Given current gas prices, shouldn't we all take transit while agencies switch to
 *The Green Transit Alliance* is happy to present this year's most awaited winners of the GTA Green Transit Awards. We applaud **`r greenest[["Agency Name"]]`** (**`r greenest$state`**) as the greenest agency, **`r winner_avoided[["Agency Name"]]`** in **`r winner_avoided$state`**, which wins both the most emissions avoided and clean grid champion. We, however, shame **`r missed[["Agency Name"]]`** (**`r missed$state`**) for the biggest missed opportunity (misses a chance to be great, but still wins an award).
 :::
 
-**New York, NY - November 6, 2026 -** Dear readers, this year has been particularly interesting. For the first time, we enriched our Data & Analytics capabilities by cross-referencing valuable sources for the awards. Our team went above and beyond the expected process by including not only the overall energy consumption NTD data source, but also the EIA State Electricity Profile to add an additional layer to associate with our NTD Service report. 
+**New York, NY - November 6, 2026 -** Dear readers, this year has been particularly interesting. For the first time, we enriched our Data & Analytics capabilities by cross-referencing valuable sources for the awards. Our team went above and beyond the expected process by including not only the overall energy consumption NTD data source, but also the EIA State Electricity Profiles to add an additional layer to associate with our NTD Service report. 
 
 This allowed the GTA to publish this highly curated report that details: how much energy each agency consumes (NTD Energy), how much transit a given agency delivers and where (NTD Service) and, finally, how clean the electricity produced in each state is (EIA). As transit electrification grew, we wanted to take a closer look at the electricity produced, since its quality can only be as clean as the grid that powers it. We hope, with this granularity, to give more insights into the U.S. landscape and keep expanding our capabilities to cover larger areas in the world each year. 
 
@@ -2597,7 +2601,7 @@ As a comparison, the typical agency emits **`r round(median_per_mile_all, 2)`** 
 
 For this particular award, we used industry assumptions (CAFE standard, **`r cafe_mpg`** mpg, one person per car) to compare CO2 emissions in this report with CO2 emissions if transit riders had driven new cars. We subtract the actual CO2 emissions from the CO2 from driving (assumed).
 
-The agency that managed to avoid the most emissions is **`r winner_avoided[["Agency Name"]]`**, with **`r fmt_big(winner_avoided$avoided_tons)`** metric tons avoided. As a comparison, driving would emit **`r fmt_ratio(winner_avoided$car_vs_transit)`** more CO2. We also note that **`r n_avoid`** of **`r n_avoided_all`** agencies avoid CO2 at all (against new cars only).
+The agency that managed to avoid the most emissions is **`r winner_avoided[["Agency Name"]]`**, with **`r fmt_big(winner_avoided$avoided_tons)`** metric tons avoided. As a comparison, driving would emit **`r fmt_ratio(winner_avoided$car_vs_transit)`** more CO2. We also note that only **`r n_avoid`** of **`r n_avoided_all`** agencies avoid CO2 at all (against new cars only).
 
 
 ```{r}
@@ -2637,7 +2641,7 @@ We found our champion with the most CO2 saved: **`r champion[["Agency Name"]]`**
 :::
 :::
 
-Fair game; we had to find the worst-of this year. What if we told you that an agency relies solely on fuel when it has a cleaner-than-average grid? That's what we verified by selecting the highest CO2 per passenger mile, in the fuel-only agencies operating in clean-grid states.
+Fair game; we had to find the worst-of this year. What if we told you that an agency relies solely on fuel when it has a cleaner-than-average grid? That's what we verified by selecting the highest CO2 per passenger mile, among the fuel-only agencies operating in clean-grid states.
 
 That's the case for **`r missed[["Agency Name"]]`** in **`r missed$state`**, with **`r round(missed$co2_lbs_per_mile, 2)`** lbs per passenger mile. To put it in perspective, this represents **`r fmt_ratio(missed_times)`** its group median (**`r round(missed_median, 2)`**), in a state whose grid is **`r fmt_ratio(missed_grid_ratio)`** cleaner than average. Worst of all, on top of being the worst among the **`r n_eligible_medium`** fuel-only **`r missed$size`** agencies in clean-grid states, it's also the worst across all **`r missed$size`** agencies... We expect some improvement for next year, **`r missed[["Agency Name"]]`**!
 
