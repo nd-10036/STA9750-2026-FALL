@@ -2443,36 +2443,64 @@ chart_avoided <- girafe(
 #| label: t8-chart-missed
 #| code-summary: "Show Missed Opportunity chart code"
 
-# All agencies in the Missed Opportunity's size group, CO2 per passenger mile
+# All agencies in the Missed Opportunity's size group, CO2 per passenger mile,
+# flagged in brown when eligible for the award (fuel only, in a state with a cleaner-than-average grid)
 missed_peers <- agency_norm |>
   filter(size == missed$size, !is.na(co2_lbs_per_mile)) |>
+  left_join(select(EIA_SEP_REPORT, abbreviation, CO2_MWh), join_by(state == abbreviation)) |>
   mutate(
     name      = str_remove(`Agency Name`, ".*dba: "),
     is_missed = `NTD ID` == missed$`NTD ID`,
+    eligible  = co2_elec_lbs == 0 & CO2_MWh < co2_us_weighted,
     tip = paste0("<b>", name, "</b> (", state, ")<br>",
-                 round(co2_lbs_per_mile, 2), " lbs CO2 per passenger mile")
+                 round(co2_lbs_per_mile, 2), " lbs CO2 per passenger mile<br>",
+                 if_else(eligible, "Eligible: fuel only, clean-grid state", "Not eligible"))
   )
 
+# Group sizes (eligible = used in the text)
+n_eligible_medium <- sum(missed_peers$eligible)
+n_other_medium    <- sum(!missed_peers$eligible)
+
+# Legend labels, with counts
+lab_eligible <- paste0("Eligible: fuel only, clean-grid state (", n_eligible_medium, ")")
+lab_other    <- paste0("Other ", tolower(missed$size), " agencies (", n_other_medium, ")")
+
+missed_peers <- missed_peers |>
+  mutate(group = factor(if_else(eligible, lab_eligible, lab_other),
+                        levels = c(lab_eligible, lab_other)))
+
+# Plotting time
 p_missed <- ggplot(missed_peers, aes(x = co2_lbs_per_mile, y = 0)) +
-  geom_point_interactive(data = filter(missed_peers, !is_missed),
-                         aes(tooltip = tip, data_id = `NTD ID`),
-                         position = position_jitter(height = 0.25, width = 0, seed = 42),
-                         color = "#8C8C8C", alpha = 0.55, size = 2.4) +
+  # Median of the whole size group
   geom_vline(xintercept = missed_median, linetype = "dashed", color = gta_green, linewidth = 0.7) +
-  annotate("text", x = missed_median, y = -0.42, hjust = -0.05, size = 3.4,
+  annotate("text", x = missed_median, y = -0.55, hjust = -0.05, size = 3.4,
            color = gta_green, fontface = "bold",
            label = paste0(missed$size, " median: ", round(missed_median, 2))) +
+  # 1. Background: other agencies (small, faint)
+  geom_point_interactive(data = filter(missed_peers, !eligible),
+                         aes(tooltip = tip, data_id = `NTD ID`, color = group),
+                         position = position_jitter(height = 0.35, width = 0, seed = 42),
+                         alpha = 0.6, size = 1.8) +
+  # 2. Foreground: eligible agencies (bigger, solid), Glendale excluded
+  geom_point_interactive(data = filter(missed_peers, eligible, !is_missed),
+                         aes(tooltip = tip, data_id = `NTD ID`, color = group),
+                         position = position_jitter(height = 0.35, width = 0, seed = 7),
+                         alpha = 0.85, size = 2.6) +
+  scale_color_manual(values = setNames(c(gta_brown, "#C9C4B9"), c(lab_eligible, lab_other)),
+                      breaks = c(lab_eligible, lab_other), name = NULL) +
+  guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+  # 3. On top: the Missed Opportunity (red dot) + label
   geom_point_interactive(data = filter(missed_peers, is_missed),
                          aes(tooltip = tip, data_id = `NTD ID`),
-                         color = "#B23A48", size = 5.5) +
+                         shape = 21, fill = "#B23A48", color = "white", stroke = 1.2, size = 3.8) +
   ggrepel::geom_label_repel(data = filter(missed_peers, is_missed),
                             aes(label = paste0(name, "\n", round(co2_lbs_per_mile, 2), " lbs/mile")),
                             color = "#B23A48", fill = alpha("#F4F1EA", 0.9), label.size = 0,
-                            size = 3.4, fontface = "bold", nudge_y = 0.3, nudge_x = -0.05, seed = 42,
+                            size = 3.4, fontface = "bold", nudge_y = 0.4, seed = 42,
                             segment.color = "#B23A48", min.segment.length = 0) +
   scale_x_log10(labels = label_number(accuracy = 0.01),
                 expand = expansion(mult = c(0.03, 0.12))) +
-  scale_y_continuous(limits = c(-0.5, 0.5), breaks = NULL) +
+  scale_y_continuous(limits = c(-0.65, 0.65), breaks = NULL) +
   labs(
     title    = "Amount of CO2 per Passenger Mile Emitted Among All Medium Agencies",
     subtitle = str_wrap("An interactive chart showing the spread across agencies (hover over each dot to see the exact lbs CO2 per passenger mile)", 90),
@@ -2480,21 +2508,20 @@ p_missed <- ggplot(missed_peers, aes(x = co2_lbs_per_mile, y = 0)) +
     caption  = str_wrap(paste0("Each dot = one ", tolower(missed$size), " agency. Source: NTD 2025; U.S. EIA"), 110)
   ) +
   ggplot_theme_gta() +
-    theme(
+  theme(
     plot.title            = element_text(size = 13, face = "bold", color = gta_green),
     plot.subtitle         = element_text(size = 10.5, color = gta_brown),
     plot.caption          = element_text(size = 8, color = "#8C8C8C", hjust = 0),
     plot.title.position   = "plot",
     plot.caption.position = "plot",
     legend.text           = element_text(size = 9.5),
-    legend.key.size       = unit(0.45, "cm"),
     axis.text             = element_text(size = 9.5),
     panel.grid.major.y    = element_blank(),
     panel.grid.major.x    = element_line(color = "#DDD8CC")
   )
 
 chart_missed <- girafe(
-  ggobj = p_missed, width_svg = 8, height_svg = 3.4,
+  ggobj = p_missed, width_svg = 8, height_svg = 3.9,
   options = list(
     opts_hover_inv(css = "opacity:0.3;"),
     opts_hover(css = "fill:#2E5E3A;r:6px;"),
@@ -2612,7 +2639,7 @@ We found our champion with the most CO2 saved: **`r champion[["Agency Name"]]`**
 
 Fair game; we had to find the worst-of this year. What if we told you that an agency relies solely on fuel when it has a cleaner-than-average grid? That's what we verified by selecting the highest CO2 per passenger mile, in the fuel-only agencies operating in clean-grid states.
 
-That's the case for **`r missed[["Agency Name"]]`** in **`r missed$state`**, with **`r round(missed$co2_lbs_per_mile, 2)`** lbs per passenger mile. To put in perspective, this represents **`r fmt_ratio(missed_times)`** its group median (**`r round(missed_median, 2)`**), in a state whose grid is **`r fmt_ratio(missed_grid_ratio)`** cleaner than average. We expect some improvement for next year, **`r missed[["Agency Name"]]`**!
+That's the case for **`r missed[["Agency Name"]]`** in **`r missed$state`**, with **`r round(missed$co2_lbs_per_mile, 2)`** lbs per passenger mile. To put it in perspective, this represents **`r fmt_ratio(missed_times)`** its group median (**`r round(missed_median, 2)`**), in a state whose grid is **`r fmt_ratio(missed_grid_ratio)`** cleaner than average. Worst of all, on top of being the worst among the **`r n_eligible_medium`** fuel-only **`r missed$size`** agencies in clean-grid states, it's also the worst across all **`r missed$size`** agencies... We expect some improvement for next year, **`r missed[["Agency Name"]]`**!
 
 ```{r}
 #| label: pr-chart-missed
