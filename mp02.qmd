@@ -22,7 +22,6 @@ Last Updated: `r format(Sys.time(), "%A %B %d, %Y at %I:%M %p")`
 #| message: false
 #| code-summary: "Show setup code"
 library(tidyverse)
-library(skimr)
 library(gt)
 library(scales)
 library(gtExtras)
@@ -1885,9 +1884,6 @@ best_overall <- winners |> slice_min(co2_lbs_per_mile, n = 1)
 # Two routes: mostly electric vs. (almost) no electricity
 n_elec_winners <- sum(winners$share_elec > 0.5)
 n_fuel_winners <- sum(winners$share_elec < 0.05)
-
-# Small winners: high CO2 per trip, long trips
-small_winners  <- winners |> filter(size == "Small")
 
 # Flagged winners (†)
 n_flagged_winners <- sum(winners$any_flagged)
