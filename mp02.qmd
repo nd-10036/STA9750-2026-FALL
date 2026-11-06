@@ -289,9 +289,12 @@ NTD_ENERGY <- load_ntd_energy()
 #| code-summary: "Show summary table code"
 #| html-table-processing: none
 NTD_ENERGY |>
+  mutate(`Kilowatt hours of Electric Propulsion` = log10(`Kilowatt hours of Electric Propulsion` + 1)) |>
+  rename(`log10(Kilowatt hours of Electric Propulsion + 1)` = `Kilowatt hours of Electric Propulsion`) |>
   gt_plt_summary(title = "NTD Energy Consumption") |>
   tab_source_note(type_legend) |>
   tab_source_note(axis_note) |>
+  tab_source_note("Electric Propulsion transformed to log units, values with extreme skews") |>
   tab_source_note("Source: NTD 2025 Energy Consumption")
 ```
 
@@ -364,10 +367,19 @@ NTD_SERVICE <- load_ntd_service()
 #| html-table-processing: none
 # gt_plt_summary() can't plot TRUE/FALSE columns, so show this one as text here only
 NTD_SERVICE |>
-  mutate(flagged_likely_inaccurate = as.character(flagged_likely_inaccurate)) |>
+  mutate(
+    flagged_likely_inaccurate = as.character(flagged_likely_inaccurate),
+    total_upt                 = log10(total_upt + 1),
+    sum_passenger_miles       = log10(sum_passenger_miles + 1)
+  ) |>
+  rename(
+    `log10(total_upt + 1)`           = total_upt,
+    `log10(sum_passenger_miles + 1)` = sum_passenger_miles
+  ) |>
   gt_plt_summary(title = "NTD Service by Agency") |>
   tab_source_note(type_legend) |>
   tab_source_note(axis_note) |>
+  tab_source_note("Total UPT and Passenger miles transformed to log units, values with extreme skews - real values discussed in Section 3") |>
   tab_source_note("Source: NTD 2025 Service by Agency")
 ```
 
@@ -507,7 +519,7 @@ We take a closer look at the distribution, and notice **`r fmt_pct(energy_zero_s
 
 Overall, we note a slightly incomplete table, with **`r fmt_pct(service_na_share, 0.1)`** missing values: **`r fmt_pct(service_na_miles, 0.1)`** for passenger miles, **`r fmt_pct(service_na_area_sqmi, 0.1)`** for service area in square miles and **`r fmt_pct(service_na_area_pop, 0.1)`** for service area population. The table contains **`r fmt_num(service_rows)`** rows (one per agency + mode + type of service); NTD_ID is **`r type_id_service`**, while it is **`r type_id_energy`** in the NTD Energy Consumption data set (worth noting for future joins).
 
-We take a closer look at the distribution, and notice **`r n_flagged`** flagged records (which are records likely inaccurate, signaled as questionable by the NTD). We also note that the UPT mean is around **`r fmt_ratio(upt_mean / upt_median)`** the median, indicating an extremely skewed distribution. We can assume that some agencies may account for a large portion of the trips compared to others. Given the **`r fmt_pct(service_na_miles, 0.1)`** missing values for passenger miles, per the professor, we note a gap in the data source (however limited to small services - **`r fmt_pct(share_upt_no_miles, 0.1)`** of total UPT).
+We take a closer look at the distribution, and notice **`r n_flagged`** flagged records (which are records likely inaccurate, signaled as questionable by the NTD). We also note that the UPT mean is around **`r fmt_ratio(upt_mean / upt_median)`** the median, indicating an extremely skewed distribution. We can assume that some agencies may account for a large portion of the trips compared to others. Given the **`r fmt_pct(service_na_miles, 0.1)`** missing values for passenger miles, per the professor's guidance, we note a gap in the data source (however limited to small services - **`r fmt_pct(share_upt_no_miles, 0.1)`** of total UPT).
 
 ```{=html}
 <div style="background-color: #2E5E3A; color: #FFFFFF; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">How the Tables Fit Together</div>
@@ -525,7 +537,7 @@ They all connect through the NTD_SERVICE Report as the "hub" table (NTD_SERVICE 
 
 Each table is interconnected with different keys. Both NTD Reports share similar keys, but the join requires some small cleaning steps due to the difference in grain (**`r n_dup_service`** agency + mode pairs appearing on several rows), ID type with **`r type_id_service`** vs. **`r type_id_energy`**, and exact wording for column names. We will join the NTD Reports on a pair of columns, NTD_ID + mode (all **`r n_modes_energy`** mode codes appear in both tables), where the join will naturally fit (see next step for details and execution). For the EIA_SEP_REPORT, the abbreviation key has been chosen because it matches the same structure as the state key in the NTD_SERVICE Report. The EIA_SEP_REPORT connects with the `character` field **abbreviation** (which is a two-letter state code, e.g. NY) to the NTD_SERVICE Report on the `character` field **state** (which is the same two-letter state code).
 
-The overall structure of the 3 data sets allows for a well-rounded interconnection, based on 2 similar sources and a key state connection with the EIA_SEP_REPORT. That said, not every row finds a match: when it comes to energy, **`r n_energy_only`** energy agencies are missing from NTD_SERVICE, but **`r fmt_num(n_service_only)`** agencies in NTD_SERVICE have no energy data (no emissions estimate) and DC and the territories (**`r paste(states_not_in_eia, collapse = ", ")`**) are dropped when joining to EIA_SEP_REPORT, which only covers the 50 states. Combined, the 3 tables can provide the information needed for further green transit analysis, with the appropriate granularity (that is, the state location, energy source with CO2 indicators, electricity generation and price, agencies' services with areas, population and UPT and, finally, the associated fuel used per service).
+The overall structure of the 3 data sets allows for a well-rounded interconnection, based on 2 similar sources and a key state connection with the EIA_SEP_REPORT. That said, not every row finds a match: when it comes to energy, **`r n_energy_only`** energy agencies are missing from NTD_SERVICE, and **`r fmt_num(n_service_only)`** agencies in NTD_SERVICE have no energy data (no emissions estimate) and DC and the territories (**`r paste(states_not_in_eia, collapse = ", ")`**) are dropped when joining to EIA_SEP_REPORT, which only covers the 50 states. Combined, the 3 tables can provide the information needed for further green transit analysis, with the appropriate granularity (that is, the state location, energy source with CO2 indicators, electricity generation and price, agencies' services with areas, population and UPT and, finally, the associated fuel used per service).
 
 
 ```{=html}
@@ -753,7 +765,7 @@ After the mapping, we note that there are **`r n_unknown_modes`** modes left as 
 
 Now that the data cleaning and preparation steps have been done, we start analyzing the data in the 3 tables. Our goal is to break down, with each report, the primary sources used by states, the power used to operate U.S. public transit, the agencies operating the most transit in the U.S. with associated average trips. Ultimately, we wish to get the big picture and required granularity to assess the dirtiest and cleanest agencies that move millions of people across the U.S.
 
-We explore this granularity to prepare the emission analysis (that will be analyzed later in the report), to ultimately determine a ranking of "clean" states and transit agencies (since states power grids and grids power electric transit, both rankings are relevant).
+We explore this granularity to prepare the emission analysis (that will be analyzed later in the report), to ultimately determine a ranking of "clean" states and transit agencies (since states' power grids and grids power electric transit, both rankings are relevant).
 
 Throughout this step, we use the American Public Transportation Association (APTA) report (APTA, 2026). The report follows a similar analysis, concentrated on transportation modes and agencies. APTA uses the same NTD reports for the data, which allows for a consistency check across our findings, and a potential comparison between the years 2024 (APTA) and our analysis (2025). Selected figures will be used that follow the same scopes and definitions as this analysis does.
 
@@ -2040,8 +2052,8 @@ p_map <- ggplot(states_sf) +
     title    = "Profile per State with Overall lbs CO2 per Passenger Mile",
     subtitle = str_wrap("An interactive map detailing, for each state, the number of agencies, the cleanest one, share of CO2 from electricity and grid emissions (hover over to get the details)", 95),
     caption  = str_wrap(paste0("Light = close to the U.S. overall value, all trips combined (", round(us_per_mile, 2),
-                               "Green = cleaner / brown = dirtier than U.S. value",
                                " lbs per passenger mile); log scale. Grey = no agency kept. ",
+                               "Green = cleaner / brown = dirtier than U.S. value. ",
                                "States with few agencies can be driven by one agency. ",
                                "Source: NTD 2025 (Energy Consumption, Service by Agency); U.S. EIA State Electricity Profiles"), 110)
   ) +
