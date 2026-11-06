@@ -2622,7 +2622,7 @@ As a comparison, the typical agency emits **`r round(median_per_mile_all, 2)`** 
 
 For this particular award, we used industry assumptions (CAFE standard, **`r cafe_mpg`** mpg, one person per car) to compare CO2 emissions in this report with CO2 emissions if transit riders had driven new cars. We subtract the actual CO2 emissions from the CO2 from driving (assumed).
 
-The agency that managed to avoid the most emissions is **`r winner_avoided[["Agency Name"]]`**, with **`r fmt_big(winner_avoided$avoided_tons)`** metric tons avoided. As a comparison, driving would emit **`r fmt_ratio(winner_avoided$car_vs_transit)`** more CO2. We also note that only **`r n_avoid`** of **`r n_avoided_all`** agencies avoid CO2 at all (against new cars only).
+The agency that managed to avoid the most emissions is **`r winner_avoided[["Agency Name"]]`**, with **`r fmt_big(winner_avoided$avoided_tons)`** metric tons avoided. As a comparison, driving would emit **`r fmt_ratio(winner_avoided$car_vs_transit)`** more CO2. We also note that only **`r n_avoid`** of **`r n_avoided_all`** agencies avoid CO2 at all (against new cars only, which is a strong limitation since a lot of older, less fuel-efficient cars are still running in the country).
 
 
 ```{r}
