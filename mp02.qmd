@@ -1076,7 +1076,7 @@ ggplot(fuel_totals, aes(x = total, y = reorder(fuel, total), fill = unit)) +
     title = "What Powers U.S. Public Transit?",
     subtitle = "A mix of electricity-powered transit and traditional energy",
     x = NULL, y = NULL,
-    caption = "Source: NNTD 2025 Energy Consumption"
+    caption = "Source: NTD 2025 Energy Consumption"
   ) +
   ggplot_theme_gta() +
   theme(
@@ -2564,12 +2564,12 @@ Given current gas prices, shouldn't we all take transit while agencies switch to
 :::
 
 ::: {style="font-size: 1em; line-height: 1.5; color: #DDE5D2; background-color: rgba(255,255,255,0.06); padding: 0.9em 1.2em 0.1em 1.2em; border-radius: 6px; margin-bottom: 1.5em;"}
-*The Green Transit Alliance* is happy to present this year's most awaited winners of the GTA Green Transit Awards. We applaud **`r greenest[["Agency Name"]]`** (**`r greenest$state`**) as the greenest agency, and **`r winner_avoided[["Agency Name"]]`** (**`r winner_avoided$state`**), which wins both the most emissions avoided and clean grid champion awards. We, however, shame **`r missed[["Agency Name"]]`** (**`r missed$state`**) for the biggest missed opportunity (misses a chance to be great, but still wins an award).
+*The Green Transit Alliance* is happy to present this year's most awaited winners of the GTA Green Transit Awards. We applaud the **`r greenest[["Agency Name"]]`** (**`r greenest$state`**) as the greenest agency, and **`r winner_avoided[["Agency Name"]]`** (**`r winner_avoided$state`**), which wins both the most emissions avoided and clean grid champion awards. We, however, shame **`r missed[["Agency Name"]]`** (**`r missed$state`**) for the biggest missed opportunity (misses a chance to be great, but still wins an award).
 :::
 
-**New York, NY - November 6, 2026 -** Dear readers, this year has been particularly interesting. For the first time, we enriched our Data & Analytics capabilities by cross-referencing valuable sources for the awards. Our team went above and beyond the expected process by including not only the overall energy consumption NTD data source, but also the EIA State Electricity Profiles to add an additional layer to associate with our NTD Service report. 
+**New York, NY - November 6, 2026 -** Dear readers, this year has been particularly interesting. For the first time, we enriched our Data & Analytics capabilities by cross-referencing valuable sources for the awards. Our team went above and beyond the expected process by including not only the overall energy consumption NTD data source, but also the EIA State Electricity Profiles to add a layer to combine with our NTD Service report. 
 
-This allowed the GTA to publish this highly curated report that details: how much energy each agency consumes (NTD Energy), how much transit a given agency delivers and where (NTD Service) and, finally, how clean the electricity produced in each state is (EIA). As transit electrification grew, we wanted to take a closer look at the electricity produced, since its quality can only be as clean as the grid that powers it. We hope, with this granularity, to give more insights into the U.S. landscape and keep expanding our capabilities to cover larger areas in the world each year. 
+This allowed the GTA to publish this highly curated report that details: how much energy each agency consumes (NTD Energy), how much transit a given agency delivers and where (NTD Service) and, finally, how clean the electricity produced in each state is (EIA). As transit electrification grew, we wanted to take a closer look at the electricity produced, since it can only be as clean as the grid that powers it. We hope, with this granularity, to give more insights into the U.S. landscape and keep expanding our capabilities to cover larger areas in the world each year. 
 
 Take a look at the detailed results below, and we're happy to receive any feedback to improve our activities.
 
@@ -2644,7 +2644,7 @@ We found our champion with the most CO2 saved: **`r champion[["Agency Name"]]`**
 :::
 :::
 
-Fair game; we had to find the worst-of this year. What if we told you that an agency relies solely on fuel when it has a cleaner-than-average grid? That's what we verified by selecting the highest CO2 per passenger mile, among the fuel-only agencies operating in clean-grid states.
+Fair game; we had to find the "worst-of" this year. What if we told you that an agency relies solely on fuel when its state has a cleaner-than-average grid? That's what we verified by selecting the highest CO2 per passenger mile, among the fuel-only agencies operating in clean-grid states.
 
 That's the case for **`r missed[["Agency Name"]]`** in **`r missed$state`**, with **`r round(missed$co2_lbs_per_mile, 2)`** lbs per passenger mile. To put it in perspective, this represents **`r fmt_ratio(missed_times)`** its group median (**`r round(missed_median, 2)`**), in a state whose grid is **`r fmt_ratio(missed_grid_ratio)`** cleaner than average. Worst of all, on top of being the worst among the **`r n_eligible_medium`** fuel-only **`r missed$size`** agencies in clean-grid states, it's also the worst across all **`r missed$size`** agencies... We expect some improvement for next year, **`r missed[["Agency Name"]]`**!
 
@@ -2661,7 +2661,7 @@ chart_missed
 
 No, we are not the popular video game Grand Theft Auto (same acronym, completely different world). We're an organization dedicated to developing green energy across transit systems in the U.S. We're also dedicated to doing research to surface areas of improvement, where agencies can improve their operations to make the country a better place to live. We have extensive experience in stakeholder management, data and analytics and are known for our annual GTA Green Transit Awards, which reward the best players and flag those most in need of improvement.
 
-P.S.: please refrain from sending us inquiries about when the video game will finally come out (look at the logo please, it's a green leaf, not a gangster)
+P.S.: please refrain from sending us inquiries about when the video game will finally come out (look at the logo please, it's a green leaf, not a gangster).
 
 **Contact:** Nastassjia Durand, Executive Director of the Green Transit Alliance (GTA)
 :::
