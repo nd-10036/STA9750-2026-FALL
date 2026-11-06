@@ -89,6 +89,9 @@ fmt_num   <- function(x) scales::comma(x, accuracy = 1)
 fmt_pct   <- function(x, acc = 1) scales::percent(x, accuracy = acc)
 fmt_ratio <- function(x) paste0(round(x, 1), "×")
 fmt_big   <- function(x) scales::label_number(scale_cut = scales::cut_short_scale(), accuracy = 0.1)(x)
+
+# Short agency name: drops the legal name before "dba:" (doing business as)
+clean_name <- function(x) str_remove(x, ".*dba: ")
 ```
 
 ```{=html}
@@ -1219,7 +1222,7 @@ min_upt_trip  <- 500000
 longest_trips <- trip_by_agency |>
   filter(upt >= min_upt_trip) |>
   slice_max(trip_length, n = 5) |>
-  mutate(AGENCY = str_remove(AGENCY, ".*dba: "))
+  mutate(AGENCY = clean_name(AGENCY))
 
 # Where NYC Transit ranks among those agencies (1 = longest trips)
 nyct_trip_rank   <- trip_by_agency |>
@@ -1423,7 +1426,7 @@ share_co2_elec <- sum(emissions$co2_elec_lbs) / sum(emissions$co2_total_lbs)
 # A few rows of the joined table, key columns only (one per source table)
 emissions |>
   slice_max(co2_total_tons, n = 5) |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: ")) |>
+  mutate(`Agency Name` = clean_name(`Agency Name`)) |>
   select(`NTD ID`, `Agency Name`, Mode,            # NTD Energy
          state, total_upt,                         # NTD Service
          CO2_MWh,                                  # EIA
@@ -1471,7 +1474,7 @@ We analyze the top 10 largest transit emitters in the chart below:
 top10_long <- emissions |>
   slice_max(co2_total_tons, n = 10) |>
   mutate(
-    `Agency Name` = str_remove(`Agency Name`, ".*dba: "),
+    `Agency Name` = clean_name(`Agency Name`),
     service = str_wrap(paste0(`Agency Name`, " (", Mode, ")"), 40),
     Fuel = co2_fuel_lbs / lbs_per_ton,
     Electricity = co2_elec_lbs / lbs_per_ton
@@ -1512,7 +1515,7 @@ ggplot(top10_long, aes(x = tons, y = service, fill = source)) +
 # Top 10 emitters: facts for the text
 top10_emitters <- emissions |>
   slice_max(co2_total_tons, n = 10) |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: "))
+  mutate(`Agency Name` = clean_name(`Agency Name`))
 
 # Other NY agencies in the top 10 (besides NYC Transit)
 ny_peers <- top10_emitters |>
@@ -1621,7 +1624,7 @@ scatter_labels <- bind_rows(
 ) |>
   mutate(label = case_when(
     str_detect(`Agency Name`, "New York City Transit") ~ paste0("NYC Transit (", Mode, ")"),
-    .default = paste0(str_remove(`Agency Name`, ".*dba: "), " (", Mode, ")")
+    .default = paste0(clean_name(`Agency Name`), " (", Mode, ")")
   ))
 
 
@@ -1629,7 +1632,7 @@ scatter_labels <- bind_rows(
 outlier_dot <- scatter_df |>
   filter(total_upt >= 1e6) |>
   slice_min(co2_total_tons, n = 1) |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: "))
+  mutate(`Agency Name` = clean_name(`Agency Name`))
 
 ggplot(scatter_df, aes(x = total_upt, y = co2_total_tons, color = main_source)) +
   geom_point(aes(alpha = main_source), size = 1.8) +
@@ -1804,6 +1807,10 @@ size_summary <- agency_norm |>
     median_per_mile = median(co2_lbs_per_mile, na.rm = TRUE),
     .groups = "drop"
   )
+
+# Agencies and share per size group, named for easy inline use
+size_n     <- setNames(size_summary$n_agencies, size_summary$size)
+size_share <- size_n / sum(size_n)
 ```
 
 ```{=html}
@@ -1820,9 +1827,9 @@ At the start, we have **`r fmt_num(n_agencies_all)`** agencies. We drop **`r fmt
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">Summary: final agency data set split in groups</div>
 ```
 
-1. Small - **`r size_summary$n_agencies[size_summary$size == "Small"]`** agencies, accounting for **`r fmt_pct(mean(agency_norm$total_upt < 1e6))`** of kept agencies
-2. Medium - **`r size_summary$n_agencies[size_summary$size == "Medium"]`** agencies, accounting for **`r fmt_pct(mean(agency_norm$total_upt >= 1e6 & agency_norm$total_upt < 25e6))`** of kept agencies
-3. Large - **`r size_summary$n_agencies[size_summary$size == "Large"]`** agencies (after joins and filters), accounting for **`r fmt_pct(mean(agency_norm$total_upt >= 25e6))`** of kept agencies
+1. Small - **`r size_n["Small"]`** agencies, accounting for **`r fmt_pct(size_share["Small"])`** of kept agencies
+2. Medium - **`r size_n["Medium"]`** agencies, accounting for **`r fmt_pct(size_share["Medium"])`** of kept agencies
+3. Large - **`r size_n["Large"]`** agencies (after joins and filters), accounting for **`r fmt_pct(size_share["Large"])`** of kept agencies
 
 ```{r}
 #| label: t6-values
@@ -1847,7 +1854,7 @@ median_note <- size_summary |>
 
 # Winners with names, trip length, and how many times cleaner than their group median
 winners <- top_efficient |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: ") |> str_remove(" †"),
+  mutate(`Agency Name` = clean_name(`Agency Name`) |> str_remove(" †"),
          trip_length   = total_miles / total_upt) |>
   left_join(select(size_summary, size, median_per_mile), join_by(size)) |>
   mutate(times_cleaner = median_per_mile / co2_lbs_per_mile)
@@ -1884,13 +1891,16 @@ small_winners  <- winners |> filter(size == "Small")
 
 # Flagged winners (†)
 n_flagged_winners <- sum(winners$any_flagged)
+
+# Grid of the best overall agency's state
+best_grid <- EIA_SEP_REPORT |> filter(abbreviation == best_overall$state)
 ```
 
 ```{r}
 #| label: t6-top-efficient-table
 #| code-summary: "Show table code"
 top_efficient |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: ")) |>
+  mutate(`Agency Name` = clean_name(`Agency Name`)) |>
   select(size, `Agency Name`, state, total_upt, co2_lbs_per_upt, co2_lbs_per_mile, share_elec) |>
   gt(groupname_col = "size") |>
   tab_header(
@@ -1955,7 +1965,7 @@ n_stable_b100 <- sum(sensitivity$`NTD ID`[sensitivity$blend == "B100"] %in% winn
 
 # Table: top 3 per size under each blend
 sensitivity |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: ")) |>
+  mutate(`Agency Name` = clean_name(`Agency Name`)) |>
   select(size, rank, blend, `Agency Name`) |>
   pivot_wider(names_from = blend, values_from = `Agency Name`) |>
   gt(groupname_col = "size") |>
@@ -1989,7 +1999,7 @@ When we look at the median per group, we note that it drops: **`r round(med_smal
 
 At the top, we note two different routes: mostly electric with **`r n_elec_winners`** of **`r nrow(winners)`** winners and (almost) no electricity with **`r n_fuel_winners`** of **`r nrow(winners)`**. We note that winners who rely less on electricity tend to be, to some extent, clean per mile due to their trip lengths (longer trips, therefore the fuel is spread over many miles, all that despite not relying on electricity).
 
-Who is the best overall? **`r best_overall[["Agency Name"]]`** (**`r best_overall$state`**): **`r round(best_overall$co2_lbs_per_mile, 2)`** lbs per passenger mile, **`r fmt_pct(best_overall$share_elec)`** of its CO2 from electricity. **`r best_overall[["Agency Name"]]`** wins because it relies on electricity to operate transit, and the associated grid that powers the transit is also very clean (we recall, for **`r EIA_SEP_REPORT$state[EIA_SEP_REPORT$abbreviation == best_overall$state]`**, **`r EIA_SEP_REPORT$primary_source[EIA_SEP_REPORT$abbreviation == best_overall$state]`** as a primary source, a grid at **`r fmt_num(EIA_SEP_REPORT$CO2_MWh[EIA_SEP_REPORT$abbreviation == best_overall$state])`** lbs/MWh vs. the U.S. average of **`r fmt_num(co2_us_weighted)`**, with a ratio of **`r fmt_ratio(co2_us_weighted / EIA_SEP_REPORT$CO2_MWh[EIA_SEP_REPORT$abbreviation == best_overall$state])`** cleaner than the U.S. average).
+Who is the best overall? **`r best_overall[["Agency Name"]]`** (**`r best_overall$state`**): **`r round(best_overall$co2_lbs_per_mile, 2)`** lbs per passenger mile, **`r fmt_pct(best_overall$share_elec)`** of its CO2 from electricity. **`r best_overall[["Agency Name"]]`** wins because it relies on electricity to operate transit, and the associated grid that powers the transit is also very clean (we recall, for **`r best_grid$state`**, **`r best_grid$primary_source`** as a primary source, a grid at **`r fmt_num(best_grid$CO2_MWh)`** lbs/MWh vs. the U.S. average of **`r fmt_num(co2_us_weighted)`**, with a ratio of **`r fmt_ratio(co2_us_weighted / best_grid$CO2_MWh)`** cleaner than the U.S. average).
 
 **Note:** **`r n_flagged_winners`** winners are flagged as likely inaccurate by the NTD (kept: **`r paste(winners[["Agency Name"]][winners$any_flagged], collapse = ", ")`**, which can slightly bias the results).
 
@@ -2012,7 +2022,7 @@ state_transit <- agency_norm |>
     n_agencies   = n(),
     co2_per_mile = sum(co2_lbs_with_miles) / sum(total_miles),
     share_elec   = sum(co2_elec_lbs) / sum(co2_total_lbs),
-    best_agency  = str_remove(`Agency Name`[which.min(co2_lbs_per_mile)], ".*dba: "),
+    best_agency  = clean_name(`Agency Name`[which.min(co2_lbs_per_mile)]),
     .groups = "drop"
   ) |>
   left_join(select(EIA_SEP_REPORT, abbreviation, CO2_MWh), join_by(state == abbreviation))
@@ -2186,7 +2196,7 @@ We detail below the awards, associated rewards and metrics, eligibility, compari
 greenest <- agency_norm |>
   filter(!is.na(co2_lbs_per_mile)) |>
   slice_min(co2_lbs_per_mile, n = 1) |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: "))
+  mutate(`Agency Name` = clean_name(`Agency Name`))
 
 # Reference: typical (median) agency
 median_per_mile_all <- median(agency_norm$co2_lbs_per_mile, na.rm = TRUE)
@@ -2212,7 +2222,7 @@ avoided <- agency_norm |>
 # Winner: most CO2 avoided
 winner_avoided <- avoided |>
   slice_max(avoided_tons, n = 1) |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: "))
+  mutate(`Agency Name` = clean_name(`Agency Name`))
 
 # Agencies that emit MORE than if riders had driven (negative avoided)
 n_negative <- sum(avoided$avoided_tons < 0)
@@ -2233,7 +2243,7 @@ grid_saving <- emissions |>
 
 champion <- grid_saving |>
   slice_max(grid_saving_tons, n = 1) |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: "))
+  mutate(`Agency Name` = clean_name(`Agency Name`))
 
 # Reference: how much cleaner its grid is, and the typical electric agency's saving
 champion_grid_ratio <- co2_us_weighted / champion$CO2_MWh
@@ -2253,7 +2263,7 @@ missed <- agency_norm |>
   left_join(select(EIA_SEP_REPORT, abbreviation, CO2_MWh), join_by(state == abbreviation)) |>
   filter(CO2_MWh < co2_us_weighted) |>
   slice_max(co2_lbs_per_mile, n = 1) |>
-  mutate(`Agency Name` = str_remove(`Agency Name`, ".*dba: "))
+  mutate(`Agency Name` = clean_name(`Agency Name`))
 
 # Reference: its size group's median, and how clean its unused grid is
 missed_median     <- size_summary$median_per_mile[size_summary$size == missed$size]
@@ -2405,10 +2415,10 @@ This analysis once again proved how valuable it is to analyze performance based 
 top_avoided <- avoided |>
   slice_max(avoided_tons, n = 5) |>
   mutate(
-    name         = str_wrap(str_remove(`Agency Name`, ".*dba: "), 30),
+    name         = str_wrap(clean_name(`Agency Name`), 30),
     car_tons     = car_co2_lbs / lbs_per_ton,
     transit_tons = co2_lbs_with_miles / lbs_per_ton,
-    tip = paste0("<b>", str_remove(`Agency Name`, ".*dba: "), "</b><br>",
+    tip = paste0("<b>", clean_name(`Agency Name`), "</b><br>",
                  "If riders drove: ", fmt_big(car_tons), " tons<br>",
                  "Actual transit: ", fmt_big(transit_tons), " tons<br>",
                  "<b>Avoided: ", fmt_big(avoided_tons), " tons</b>")
@@ -2468,7 +2478,7 @@ missed_peers <- agency_norm |>
   filter(size == missed$size, !is.na(co2_lbs_per_mile)) |>
   left_join(select(EIA_SEP_REPORT, abbreviation, CO2_MWh), join_by(state == abbreviation)) |>
   mutate(
-    name      = str_remove(`Agency Name`, ".*dba: "),
+    name      = clean_name(`Agency Name`),
     is_missed = `NTD ID` == missed$`NTD ID`,
     eligible  = co2_elec_lbs == 0 & CO2_MWh < co2_us_weighted,
     tip = paste0("<b>", name, "</b> (", state, ")<br>",
