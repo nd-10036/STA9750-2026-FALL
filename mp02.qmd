@@ -519,7 +519,7 @@ We take a closer look at the distribution, and notice **`r fmt_pct(energy_zero_s
 
 Overall, we note a slightly incomplete table, with **`r fmt_pct(service_na_share, 0.1)`** missing values: **`r fmt_pct(service_na_miles, 0.1)`** for passenger miles, **`r fmt_pct(service_na_area_sqmi, 0.1)`** for service area in square miles and **`r fmt_pct(service_na_area_pop, 0.1)`** for service area population. The table contains **`r fmt_num(service_rows)`** rows (one per agency + mode + type of service); NTD_ID is **`r type_id_service`**, while it is **`r type_id_energy`** in the NTD Energy Consumption data set (worth noting for future joins).
 
-We take a closer look at the distribution, and notice **`r n_flagged`** flagged records (which are records likely inaccurate, signaled as questionable by the NTD). We also note that the UPT mean is around **`r fmt_ratio(upt_mean / upt_median)`** the median, indicating an extremely skewed distribution. We can assume that some agencies may account for a large portion of the trips compared to others. Given the **`r fmt_pct(service_na_miles, 0.1)`** missing values for passenger miles, per the professor's guidance, we note a gap in the data source (however limited to small services - **`r fmt_pct(share_upt_no_miles, 0.1)`** of total UPT).
+We take a closer look at the distribution, and notice **`r n_flagged`** flagged records (which are records likely inaccurate, signaled as questionable by the NTD). We also note that the UPT mean is around **`r fmt_ratio(upt_mean / upt_median)`** the median, indicating an extremely skewed distribution. We can assume that some agencies may account for a large portion of the trips compared to others. Given the **`r fmt_pct(service_na_miles, 0.1)`** missing values for passenger miles, we note a gap in the data source (however limited to small services - **`r fmt_pct(share_upt_no_miles, 0.1)`** of total UPT).
 
 ```{=html}
 <div style="background-color: #2E5E3A; color: #FFFFFF; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">How the Tables Fit Together</div>
@@ -584,7 +584,7 @@ data_issues |>
   gt(groupname_col = "source") |>
   tab_header(
     title = "Data Quality Issues and Handling",
-    subtitle = "Some observations to keep track of, and decisions either handled in upcoming sections or based on checks and professor's guidance"
+    subtitle = "Some observations to keep track of, and decisions either handled in upcoming sections or based on checks"
   ) |>
   cols_label(
     issue = "Issue",
