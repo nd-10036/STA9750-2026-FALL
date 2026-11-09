@@ -96,6 +96,7 @@ clean_name <- function(x) str_remove(x, ".*dba: ")
 ```{=html}
 <style>
 svg text { letter-spacing: normal !important; word-spacing: normal !important; }
+svg text { pointer-events: none; }
 </style>
 ```
 
@@ -132,13 +133,13 @@ library(stringr)
 library(httr2)
 library(rvest)
 
-get_eia_sep <- function(state, abbr){
-    library(tidyverse)
-    library(stringr)
-    library(httr2)
-    library(rvest)
-    library(fs)
-  
+get_eia_sep <- function(state, abbr) {
+  library(tidyverse)
+  library(stringr)
+  library(httr2)
+  library(rvest)
+  library(fs)
+
     state_formatted <- str_to_lower(state) |> str_replace_all("\\s", "")
     
     dir_name <- fs::path("data", "mp02")
@@ -555,31 +556,31 @@ data_issues <- tribble(
   ~source, ~issue, ~affected, ~handling,
   # NTD Service
   "NTD Service", "Several rows per agency + mode (one per type of service)",
-    paste(n_dup_service, "agency + mode pairs"), "Summed to one row per agency + mode (NTD_SERVICE_AM)",
+  paste(n_dup_service, "agency + mode pairs"), "Summed to one row per agency + mode (NTD_SERVICE_AM)",
   "NTD Service", "Missing passenger miles",
-    paste(scales::percent(service_na_miles, accuracy = 1), "of rows"), "Kept as is: a real gap in the source, limited to small services (2.2% of total UPT)",
+  paste(scales::percent(service_na_miles, accuracy = 1), "of rows"), "Kept as is: a real gap in the source, limited to small services (2.2% of total UPT)",
   "NTD Service", "Zero UPT or zero passenger miles",
-    paste(n_zero_upt, "zero UPT /", n_zero_miles, "zero miles"), "Handled later in Section 6",
+  paste(n_zero_upt, "zero UPT /", n_zero_miles, "zero miles"), "Handled later in Section 6",
   "NTD Service", "Flagged as likely inaccurate",
-    paste(n_flagged, "rows"), "Kept as is and marked in Section 6 rankings",
+  paste(n_flagged, "rows"), "Kept as is and marked in Section 6 rankings",
   # NTD Energy
   "NTD Energy", "NTD ID stored as numeric (character in NTD Service)",
-    paste(scales::comma(energy_rows), "rows"), "Converted with str_pad() and as.character() to match the 5-character format",
+  paste(scales::comma(energy_rows), "rows"), "Converted with str_pad() and as.character() to match the 5-character format",
   "NTD Energy", "Mixed units (gallons, kWh, kg)",
-    "All fuel columns", "Handled later in Section 5",
+  "All fuel columns", "Handled later in Section 5",
   "NTD Energy", "Bio-Diesel blend (e.g. B5, B20) lost at import",
-    paste(sum(NTD_ENERGY$`Gallons of Bio-Diesel` > 0), "agency + mode pairs using bio-diesel"),
-    "Assumed B20 based on DOE common blend (with sensitivity check in Section 6)",
+  paste(sum(NTD_ENERGY$`Gallons of Bio-Diesel` > 0), "agency + mode pairs using bio-diesel"),
+  "Assumed B20 based on DOE common blend (with sensitivity check in Section 6)",
   "NTD Energy", "Energy under-reported compared to service (e.g. 0 gallons for one mode with millions of trips)",
-    "Found in Section 5 (outlier check)",
-    "Excluded below 0.01 lbs CO2 per passenger mile in Section 6",
+  "Found in Section 5 (outlier check)",
+  "Excluded below 0.01 lbs CO2 per passenger mile in Section 6",
   # Across tables
   "Across tables", "Mode stored as two-letter codes",
-    paste(n_modes_energy, "codes"), "Separate cleaning step below the table",
+  paste(n_modes_energy, "codes"), "Separate cleaning step below the table",
   "Across tables", "Not covered by EIA (DC and territories)",
-    paste(states_not_in_eia, collapse = ", "), "Restrict analysis to reporting states; drop out at the EIA join in Section 5",
+  paste(states_not_in_eia, collapse = ", "), "Restrict analysis to reporting states; drop out at the EIA join in Section 5",
   "Across tables", "Agencies in NTD Service with no energy data",
-    paste(scales::comma(n_service_only), "agencies"), "Dropped only where energy data is needed (Sections 5-7), as late as possible"
+  paste(scales::comma(n_service_only), "agencies"), "Dropped only where energy data is needed (Sections 5-7), as late as possible"
 )
 
 data_issues |>
@@ -593,7 +594,7 @@ data_issues |>
     affected = "Affected",
     handling = "How Handled"
   ) |>
-    tab_style(
+  tab_style(
     style = cell_text(weight = "bold", color = gta_green),
     locations = cells_body(
       columns = c(issue, handling),
@@ -636,7 +637,7 @@ The previously mentioned data quality issues make it difficult to interpret and 
 #| label: t2-fixes
 #| code-summary: "Show data cleaning code"
 
-# Fix 1 - Convert NTD ID in NTD_ENERGY to character with str_pad() and as.character() to match the 5-character format 
+# Fix 1 - Convert NTD ID in NTD_ENERGY to character with str_pad() and as.character() to match the 5-character format
 # per the professor's advice
 NTD_ENERGY <- NTD_ENERGY |>
   mutate(`NTD ID` = str_pad(as.character(`NTD ID`), width = 5, pad = "0"))
@@ -781,7 +782,8 @@ When we evaluate electricity as a power source, we note that the grid fuels it. 
 #| label: t3a-calculations
 #| code-summary: "Show calculations"
 
-# Q3: how many pounds (on average) of CO2 are emitted per MWh of electricity produced in the US (weighted average)
+# Q3: how many pounds (on average) of CO2 are emitted per MWh of electricity, 
+# produced in the US (weighted average)
 co2_us_weighted <- weighted.mean(EIA_SEP_REPORT$CO2_MWh,
                    w = EIA_SEP_REPORT$generation_MWh)
 
@@ -1008,7 +1010,7 @@ top_agencies |>
   tab_footnote(
     footnote = "'-' means that the agency does not use that fuel",
     locations = cells_column_spanners(spanners = "fuel_spanner")
-  ) |>  
+  ) |>
   tab_source_note("Note 1: electricity shown separately in kWh; hydrogen (kg) excluded here since none of these 5 agencies uses it") |>
   tab_source_note("Note 2: comparison cannot be made due to different units (gallons vs. kWh)") |>
   opt_footnote_marks(marks = "numbers") |>
@@ -1777,7 +1779,7 @@ n_underreported_mode <- sum(agency_emissions$`NTD ID` %in% underreported_ids &
                             agency_emissions$total_upt >= min_upt &
                             agency_emissions$co2_total_lbs > 0 &
                             (agency_emissions$total_miles == 0 |
-                             agency_emissions$co2_lbs_with_miles / agency_emissions$total_miles >= 0.01))
+                            agency_emissions$co2_lbs_with_miles / agency_emissions$total_miles >= 0.01))
 
 # Step 4: apply all filters, normalize, and group by size
 agency_norm <- agency_emissions |>
@@ -2043,9 +2045,28 @@ states_sf <- usmap::us_map(regions = "states") |>
     )
   )
 
+# Label points inside each state (small Northeast states skipped: too crowded at this size)
+small_ne <- c("CT", "DC", "DE", "MA", "MD", "NH", "NJ", "RI", "VT")
+state_labels <- suppressWarnings(sf::st_point_on_surface(select(states_sf, abbr))) |>
+  filter(!abbr %in% small_ne)
+
+# Note box position
+gulf_x <- mean(sf::st_coordinates(filter(state_labels, abbr %in% c("LA", "FL")))[, "X"])
+gulf_y <- sf::st_bbox(filter(states_sf, abbr == "TX"))[["ymin"]]
+
+# Map time
 p_map <- ggplot(states_sf) +
   geom_sf_interactive(aes(fill = log_per_mile, tooltip = tip, data_id = abbr),
                       color = "white", linewidth = 0.3) +
+  # State abbreviations addition
+  geom_sf_text(data = state_labels, aes(label = abbr),
+               size = 2.6, color = "#4A4A4A", fontface = "bold") +
+  annotate("label", x = gulf_x, y = gulf_y, vjust = 1,
+           label = paste0("Not labeled (too small):\n",
+                          str_wrap(paste(small_ne, collapse = ", "), 22),
+                          "\nHover for details"),
+           size = 2.4, color = "#4A4A4A", fill = "#FFFFFF",
+           linewidth = 0.2, lineheight = 0.95) +
   scale_fill_gradient2(
     low = gta_green, mid = "#F4F1EA", high = gta_brown,
     midpoint = log10(us_per_mile), na.value = "#D9D6CF",
@@ -2056,7 +2077,7 @@ p_map <- ggplot(states_sf) +
                                barwidth = unit(14, "lines"), barheight = unit(0.5, "lines"))) +
   labs(
     title    = "Profile per State with Overall lbs CO2 per Passenger Mile",
-    subtitle = str_wrap("An interactive map detailing, for each state, the number of agencies, the cleanest one, share of CO2 from electricity and grid emissions (hover over to get the details)", 95),
+    subtitle = str_wrap("An interactive map detailing, for each state, the number of agencies, the cleanest one, share of CO2 from electricity and grid emissions (hover over to get the details)", 85),
     caption  = str_wrap(paste0("Light = close to the U.S. overall value, all trips combined (", round(us_per_mile, 2),
                                " lbs per passenger mile); log scale. Grey = no agency kept. ",
                                "Green = cleaner / brown = dirtier than U.S. value. ",
@@ -2295,8 +2316,11 @@ stack_cell <- function(top_size, top_color) {
 }
 # Rounded "pill" badge
 pill <- function(bg, fg) {
-  function(x) paste0("<span style='background:", bg, "; color:", fg, "; padding:3px 10px; border-radius:12px;",
-                     " font-weight:bold; font-size:12px; display:inline-block; white-space:normal; max-width:100%;'>", x, "</span>")
+  function(x) {
+    paste0("<span style='background:", bg, "; color:", fg, "; padding:3px 10px; border-radius:12px;",
+           " font-weight:bold; font-size:12px; display:inline-block; white-space:normal; max-width:100%;'>",
+           x, "</span>")
+  }
 }
 
 # Size group of the Clean Grid Champion (grid_saving has no size column)
