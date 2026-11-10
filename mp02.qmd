@@ -914,7 +914,7 @@ source_class |>
   gta_theme()
 ```
 
-We observe that **`r n_states_nonrenewable`** states rely mainly on **nonrenewable** sources, vs. only **`r n_states_renewable`** on **renewables**. We emphasize that "nonrenewable" isn't necessarily correlated with high CO2 emissions. Indeed **`r n_states_nuclear`** of the states rely on nuclear energy as their source. Nuclear is defined as nonrenewable (since it's derived from uranium) but emits almost no CO2. The number that will be key in the later emissions analysis is **`r n_states_fossil`** states that rely mainly on fossil fuels (where electric transit will carry the highest CO2).
+We observe that **`r n_states_nonrenewable`** states rely mainly on **nonrenewable** sources, vs. only **`r n_states_renewable`** on **renewable**. We emphasize that "nonrenewable" isn't necessarily correlated with high CO2 emissions. Indeed **`r n_states_nuclear`** of the states rely on nuclear energy as their source. Nuclear is defined as nonrenewable (since it's derived from uranium) but emits almost no CO2. The number that will be key in the later emissions analysis is **`r n_states_fossil`** states that rely mainly on fossil fuels (where electric transit will carry the highest CO2).
 
 ```{=html}
 <div style="background-color: #E8F0E3; border-left: 6px solid #2E5E3A; color: #2E5E3A; font-weight: bold; padding: 0.6em 1em; border-radius: 4px; margin: 1.5em 0 1em 0;">4.2 NTD Energy Usage</div>
@@ -2269,7 +2269,7 @@ median_saving       <- median(grid_saving$grid_saving_tons[grid_saving$kwh > 0])
 
 ```{r}
 #| label: t7-award-worst
-#| code-summary: "Show 'worst of' award code"
+#| code-summary: "Show Missed Opportunity code"
 
 # Award 4: Missed Opportunity = Medium/Large agency in a clean-grid state, running entirely on fuel,
 # with the highest CO2 per passenger mile (most to gain from electrifying)
