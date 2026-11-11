@@ -26,6 +26,13 @@ website:
             href: mp03.qmd
           - text: "Mini-Project 4"
             href: mp04.qmd
+      - text: Group Project
+        menu:
+          # - href: https://LINK-TO-SUMMARY-REPORT
+            # text: "Group Summary Report"
+          - href: individual_report.qmd
+            text: "Individual Report"
+          
     
 format:
   html:
