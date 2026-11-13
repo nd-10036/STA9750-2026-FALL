@@ -538,9 +538,19 @@ We observe 3 tables (keys and types indicated in the ER diagram):
 
 They all connect through the NTD_SERVICE Report as the "hub" table (NTD_SERVICE in the middle, connecting to EIA_SEP_REPORT on the left and NTD_ENERGY on the right).
 
-Each table is interconnected with different keys. Both NTD Reports share similar keys, but the join requires some small cleaning steps due to the difference in grain (**`r n_dup_service`** agency + mode pairs appearing on several rows), ID type with **`r type_id_service`** vs. **`r type_id_energy`**, and exact wording for column names. We will join the NTD Reports on a pair of columns, NTD_ID + mode (all **`r n_modes_energy`** mode codes appear in both tables), where the join will naturally fit (see next step for details and execution). For the EIA_SEP_REPORT, the abbreviation key has been chosen because it matches the same structure as the state key in the NTD_SERVICE Report. The EIA_SEP_REPORT connects with the `character` field **abbreviation** (which is a two-letter state code, e.g. NY) to the NTD_SERVICE Report on the `character` field **state** (which is the same two-letter state code).
+The overall structure of the 3 data sets allows for a well-rounded interconnection, based on 2 similar sources and a key state connection with the EIA_SEP_REPORT. That said, not every row finds a match: **`r n_energy_only`** agencies in NTD_ENERGY are missing from NTD_SERVICE, and **`r fmt_num(n_service_only)`** agencies in NTD_SERVICE have no energy data (no emissions estimate) and DC and the territories (**`r paste(states_not_in_eia, collapse = ", ")`**) are dropped when joining to EIA_SEP_REPORT, which only covers the 50 states. 
 
-The overall structure of the 3 data sets allows for a well-rounded interconnection, based on 2 similar sources and a key state connection with the EIA_SEP_REPORT. That said, not every row finds a match: when it comes to energy, **`r n_energy_only`** energy agencies are missing from NTD_SERVICE, and **`r fmt_num(n_service_only)`** agencies in NTD_SERVICE have no energy data (no emissions estimate) and DC and the territories (**`r paste(states_not_in_eia, collapse = ", ")`**) are dropped when joining to EIA_SEP_REPORT, which only covers the 50 states. Combined, the 3 tables can provide the information needed for further green transit analysis, with the appropriate granularity (that is, the state location, energy source with CO2 indicators, electricity generation and price, agencies' services with areas, population and UPT and, finally, the associated fuel used per service).
+::: {.callout-tip title="How the joins work: keys and cleaning needed" collapse="true"}
+
+Each table is interconnected with different keys. Both NTD Reports share similar keys, but the join requires some small cleaning steps due to the difference in grain (**`r n_dup_service`** agency + mode pairs appearing on several rows), different ID types (**`r type_id_service`** vs. **`r type_id_energy`**), and exact wording for column names. 
+
+We will join the NTD Reports on a pair of columns, NTD_ID + mode (all **`r n_modes_energy`** mode codes appear in both tables), where the join will naturally fit (see next step for details and execution). 
+
+For the EIA_SEP_REPORT, the abbreviation key has been chosen because it matches the structure of the state key in the NTD_SERVICE Report. The EIA_SEP_REPORT connects with the `character` field **abbreviation** (which is a two-letter state code, e.g. NY) to the NTD_SERVICE Report on the `character` field **state** (the same two-letter state code).
+
+::: 
+
+Combined, the 3 tables can provide the information needed for further green transit analysis, with the appropriate granularity (that is, the state location, energy source with CO2 indicators, electricity generation and price, agencies' services with areas, population and UPT and, finally, the associated fuel used per service).
 
 
 ```{=html}
@@ -628,7 +638,7 @@ We now clean the data in 2 different steps:
 2. Recoding Transit Modes
 
 ```{=html}
-<div style="color: #2E5E3A; font-weight: bold; border-bottom: 2px solid #2E5E3A; padding: 0.4em 0; margin: 1.5em 0 1em 0;">Step 1: Fixing the Data Issues</div>
+<div style="color: #2E5E3A; font-weight: bold; border-bottom: 2px solid #2E5E3A; padding: 0.4em 0; margin: 1.5em 0 1em 0;">Step 1: Fixing the Data Issues (Task 2)</div>
 ```
 
 The previously mentioned data quality issues make it difficult to interpret and join the data. Indeed, the NTD ID columns format across both NTD Reports differs (**`r type_id_service`** vs. **`r type_id_energy`**) and we noted several rows per agency + mode. We clean the data accordingly.
