@@ -2398,12 +2398,16 @@ winners_tbl |>
   gta_theme()
 ```
 
-Finally, we found them:
+Finally, we found them (more details, figures and comparisons in the box below).
+
+::: {.callout-tip title="Award results in detail" collapse="true"}
 
 1. **Greenest Transit Agency** - **`r greenest[["Agency Name"]]`** in **`r greenest$state`**. We find **`r round(greenest$co2_lbs_per_mile, 2)`** lbs CO2 per passenger mile, compared to the typical agency's **`r round(median_per_mile_all, 2)`**. This winner is **`r fmt_ratio(greenest_times)`** cleaner.
 2. **Most Emissions Avoided** - **`r winner_avoided[["Agency Name"]]`**. We find **`r fmt_big(winner_avoided$avoided_tons)`** metric tons of CO2 avoided. We note that driving would emit **`r fmt_ratio(winner_avoided$car_vs_transit)`** more CO2. For this award, we use the CAFE standard (NHTSA, 2022) - a new car (**`r cafe_mpg`** mpg) emits **`r round(car_per_mile, 2)`** lbs CO2 per mile. It's important to highlight that only **`r n_avoid`** of **`r n_avoided_all`** agencies avoid CO2, and **`r n_negative`** agencies emit more than if riders had driven. However, the CAFE standard evaluates against new cars, whereas a large number of older models are still running, and have much higher emissions. This limitation thus makes it more difficult to say if using transit would emit less than driving old cars.
 3. **Clean Grid Champion** - **`r champion[["Agency Name"]]`** in **`r champion$state`**. We find **`r fmt_big(champion$grid_saving_tons)`** metric tons of CO2 saved. Its grid emits **`r fmt_num(champion$CO2_MWh)`** lbs/MWh vs. the U.S. average of **`r fmt_num(co2_us_weighted)`** (**`r fmt_ratio(champion_grid_ratio)`** cleaner). Furthermore, **`r fmt_big(median_saving)`** tons are saved by the typical agency using electricity. Perhaps it's time to move to New York?
 4. **Missed Opportunity** - well, well, well... **`r missed[["Agency Name"]]`** (in **`r missed$state`**, in the **`r missed$size`** group) what happened there? In California, really? We had higher hopes for you in this ranking. We look at **`r round(missed$co2_lbs_per_mile, 2)`** lbs CO2 per passenger mile compared to your group's median of **`r round(missed_median, 2)`** (**`r fmt_ratio(missed_times)`** the median)... Additionally, we check for the state grid's quality, and find **`r fmt_num(missed$CO2_MWh)`** lbs/MWh, which is **`r fmt_ratio(missed_grid_ratio)`** cleaner than the U.S. average. Is there anything else to add? Perhaps that the **`r missed[["Agency Name"]]`** should consider electrifying.
+
+:::
 
 **Note:** **`r winner_avoided[["Agency Name"]]`** wins two awards. Even if the grid is not the cleanest in the country, its size wins because a large portion of operations relies on electricity.
 
