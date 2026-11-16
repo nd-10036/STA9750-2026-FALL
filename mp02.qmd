@@ -638,7 +638,7 @@ We now clean the data in 2 different steps:
 2. Recoding Transit Modes
 
 ```{=html}
-<div style="color: #2E5E3A; font-weight: bold; border-bottom: 2px solid #2E5E3A; padding: 0.4em 0; margin: 1.5em 0 1em 0;">Step 1: Fixing the Data Issues (Task 2)</div>
+<div style="color: #2E5E3A; font-weight: bold; border-bottom: 2px solid #2E5E3A; padding: 0.4em 0; margin: 1.5em 0 1em 0;">Step 1: Fixing the Data Issues</div>
 ```
 
 The previously mentioned data quality issues make it difficult to interpret and join the data. Indeed, the NTD ID columns format across both NTD Reports differs (**`r type_id_service`** vs. **`r type_id_energy`**) and we noted several rows per agency + mode. We clean the data accordingly.
@@ -685,7 +685,7 @@ n_energy_unmatched <- NTD_ENERGY |> # should be 0: every energy ID now matches
 We now have the same type of variable for both ID columns (with **`r type_id_energy_after`** in both tables, and **`r n_energy_unmatched`** remaining unmatched IDs after the cleaning and **`r fmt_num(nrow(NTD_SERVICE_AM))`** rows after summing, from **`r fmt_num(service_rows)`**). Finally, we note that **`r n_dup_after_fix`** duplicates remain.
 
 ```{=html}
-<div style="color: #2E5E3A; font-weight: bold; border-bottom: 2px solid #2E5E3A; padding: 0.4em 0; margin: 1.5em 0 1em 0;">Step 2: Recoding Transit Modes</div>
+<div style="color: #2E5E3A; font-weight: bold; border-bottom: 2px solid #2E5E3A; padding: 0.4em 0; margin: 1.5em 0 1em 0;">Step 2: Recoding Transit Modes (Task 2)</div>
 ```
 
 We note that the `Mode` columns are not easy to work with. We observe two-letter codes that are not currently readable (e.g. HR, which means Heavy Rail, or CR, which means Commuter Rail). Therefore, we first use the official NTD mode list (NTD, 2025) to map the mode code to the associated meaning for each mode, which will ultimately make the information easier to read. We then recode tables identically to ensure that the tables are joinable.
