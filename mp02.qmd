@@ -2018,6 +2018,8 @@ Who is the best overall? **`r best_overall[["Agency Name"]]`** (**`r best_overal
 
 Since reading a lot of text with complicated calculations is not for everyone, we visualize the results with an interactive map.
 
+::: {style="margin-bottom: 2.5em;"}
+
 ```{r}
 #| label: t6-state-map
 #| code-summary: "Show state map code"
@@ -2119,6 +2121,7 @@ girafe(
 )
 ```
 
+:::
 
 Now that the analysis is over, we go to the fun part - awarding trophies to agencies.
 
