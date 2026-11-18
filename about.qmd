@@ -62,10 +62,13 @@ Bachelor of Management | May 2020
 
 
 ###### Baruch Coursework 
-- NYPD Crime Dataset Analysis | Python, pandas, SQLite | Built an end-to-end pipeline (API ingestion → cleaning → analysis → SQLite)\
-- Auto Ops DBMS Deployment | MySQL, Flask | Designed a normalized database and Flask front end for an auto shop, from business requirements to a working app\
-- GenAI Candidate Screening Tool | LLM | GenAI generated HR tool to shortlist candidates for a role\
-- R Data Analysis Portfolio (in progress) | R, RStudio, Quarto, GitHub | building 5 published data analysis projects, from data cleaning to strategy recommendations (e.g., Netflix viewership data, 2023–2026)
+- **NYPD Crime Dataset Analysis** | Python, pandas, SQLite | Built an end-to-end pipeline on 1M NYPD complaint records (2018–2019): API ingestion, cleaning, statistical analysis, visualization, and SQLite export.\
+- **Auto Ops DBMS Deployment** | MySQL, Flask | Designed a 16-table normalized MySQL database and Flask front end for an auto shop, from business requirements and data modeling to a working app.\
+- **Commercial vs. Government Rocket Launch Reliability** *(in progress)* | R, Quarto, GitHub | Team project on 3k launches (2000–2025). Merged the Launch Library 2 API with the GCAT launch catalog into the team's master dataset and built a shared data-loading setup (local → private repo → API). Analyzing how the reliability gap changed over time. See Group Project.\
+- **What Drives Champions League Qualification?** *(in progress)* | Python, scikit-learn | Built a 1,170-row dataset (Big Five European leagues, 12 seasons); modeling which performance metrics drive top-four finishes.\
+- **R Data Analysis Portfolio** *(in progress)* | R, Quarto, GitHub Pages | 3 published analyses, each from raw data to recommendations: Netflix viewership, U.S. transit agency emissions (NTD + EIA), 2026 midterm results. See Mini Projects.\
+- **GenAI at Work Dashboard** *(in progress)* | Tableau | Team dashboard on workplace GenAI adoption and time saved by occupation. Built the interactive section: KPI tiles, a "Your week with AI" time-savings calculator, and an AI vs. PC adoption comparison.\
+- **GenAI Candidate Screening Tool** *(in progress)* | LLM (Claude Projects) | Built an LLM-based HR tool that screens and shortlists candidates for a role.\
 
 ###### Professional Experience 
 - Rider verbatim analysis (MTA) - Python, pandas, scikit-learn, NLP - cleaned and analyzed ~17,000 rider verbatim and built branch-level insight dashboards (qualitative and quantitative) to deliver strategic recommendations to leadership\
